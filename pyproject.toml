@@ -21,7 +21,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-llm = ["openai>=2.0,<3"]
+llm = ["openai>=2.0,<4"]
 dev = ["pytest>=8,<10"]
 
 [tool.pytest.ini_options]
