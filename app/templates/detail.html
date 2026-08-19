@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ item.request_key }} — AI Audience Ops{% endblock %}
+{% block content %}
+<a href="/" class="back">← Dashboard</a>
+<section class="detail-head">
+  <div>
+    <p class="eyebrow">{{ item.request_key }}</p>
+    <h1>{{ item.intent.campaign_purpose }}</h1>
+    <p class="lede small">{{ item.raw_request }}</p>
+  </div>
+  <div class="status-stack">
+    <span class="pill status-{{ item.status|lower }}">{{ item.status }}</span>
+    <span class="pill neutral">Risk: {{ item.risk_level }}</span>
+    <span class="pill neutral">Intent confidence: {{ item.confidence }}%</span>
+  </div>
+</section>
+
+<section class="grid-3">
+  <div class="kpi"><span>Eligible audience</span><strong>{{ "{:,}".format(item.eligible_count) }}</strong><small>governed recipients</small></div>
+  <div class="kpi"><span>Manager</span><strong class="smaller">{{ item.manager or "Not identified" }}</strong><small>{{ item.approved_by and ("Approved by " ~ item.approved_by) or "approval identity" }}</small></div>
+  <div class="kpi"><span>Destination</span><strong class="smaller">{{ item.marketing_provider }}</strong><small>{{ item.external_segment_id or "not synced" }}</small></div>
+</section>
+
+{% if item.status == 'REVIEW_REQUIRED' %}
+<section class="action-panel warn">
+  <div><strong>Human approval required</strong><p>The deterministic policy threshold was exceeded. The audience cannot sync until the identified manager approves it.</p></div>
+  <form action="/requests/{{ item.id }}/approve" method="post"><input name="approver" value="{{ item.manager or 'Jane Smith' }}"><button class="primary">Approve audience</button></form>
+</section>
+{% elif item.status in ['READY_TO_SYNC', 'APPROVED', 'SYNC_FAILED'] %}
+<section class="action-panel good">
+  <div><strong>Ready for governed sync</strong><p>Raw email addresses remain hidden in this UI. The integration layer receives only eligible records after all system controls.</p></div>
+  <form action="/requests/{{ item.id }}/sync" method="post"><button class="primary">Sync to {{ item.marketing_provider }}</button></form>
+</section>
+{% elif item.status == 'SYNCED' %}
+<section class="action-panel good"><div><strong>Synced</strong><p>{{ item.sync_detail }}</p></div><code>{{ item.external_segment_id }}</code></section>
+{% elif item.status == 'BLOCKED' %}
+<section class="action-panel danger"><div><strong>Request blocked</strong><p>The system will not produce an audience or expose student contact data when a policy-blocking condition is present.</p></div></section>
+{% endif %}
+
+<section class="grid-2">
+  <div class="panel">
+    <div class="panel-head"><div><p class="eyebrow">CONTROLLED AI</p><h2>Structured intent</h2></div></div>
+    <pre>{{ item.intent | tojson(indent=2) }}</pre>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><div><p class="eyebrow">POLICY RETRIEVAL</p><h2>Retrieved policy context</h2></div></div>
+    {% for p in item.retrieved_policies %}
+      <div class="policy-card"><div><strong>{{ p.title }}</strong><span>{{ p.policy_id }}</span></div><p>{{ p.excerpt }}</p></div>
+    {% else %}<p class="empty">No relevant policy context retrieved.</p>{% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">DETERMINISTIC CONTROLS</p><h2>Policy evaluation</h2></div></div>
+  <div class="checks">
+    {% for check in item.policy_checks %}
+      <div class="check check-{{ check.result|lower }}"><span>{{ check.result }}</span><div><strong>{{ check.code }}</strong><p>{{ check.message }}</p></div></div>
+    {% endfor %}
+  </div>
+</section>
+
+{% if item.funnel %}
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">EXPLAINABLE SEGMENTATION</p><h2>Audience funnel</h2></div></div>
+  <div class="funnel">
+  {% for step in item.funnel %}
+    <div class="funnel-row"><div><strong>{{ step.label }}</strong><span>{{ "{:,}".format(step.removed) }} removed</span></div><div class="bar"><i style="width: {{ (100 * step.after / item.funnel[0].after) if item.funnel[0].after else 0 }}%"></i></div><b>{{ "{:,}".format(step.after) }}</b></div>
+  {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">AUDIT TRAIL</p><h2>Workflow history</h2></div></div>
+  <div class="timeline">
+    {% for event in item.events %}
+      <div class="timeline-item"><time>{{ event.created_at.strftime('%H:%M:%S') }}</time><div><strong>{{ event.event_type.replace('_', ' ') }}</strong><span>{{ event.actor }}</span><p>{{ event.detail }}</p></div></div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

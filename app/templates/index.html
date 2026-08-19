@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}AI Audience Ops — Dashboard{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">ENTERPRISE AI WORKFLOW DEMO</p>
+    <h1>Ask for an audience in plain English.<br>Get a governed segment, not a spreadsheet.</h1>
+    <p class="lede">Natural-language audience requests are translated into constrained filters, checked against marketing/data policies, evaluated over synthetic LearnDash data, approved when required, and synced to a mock Mailchimp or Constant Contact destination.</p>
+  </div>
+  <div class="metric-card">
+    <span>Demo dataset</span><strong>{{ "{:,}".format(settings.synthetic_student_count) }}</strong><small>synthetic students</small>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div><p class="eyebrow">NEW REQUEST</p><h2>Marketing audience request</h2></div>
+    <span class="pill neutral">LLM: {{ settings.llm_provider }}</span>
+  </div>
+  <form action="/requests" method="post" class="request-form">
+    <textarea id="requestText" name="text" rows="7" required>Please create an audience for promoting Class C. Include students who completed Class A within the last 90 days, have taken Class B, match our career advancement learner profile, and are eligible to receive marketing emails. Exclude anyone who has already enrolled in Class C. Manager is Jane Smith.</textarea>
+    <div class="form-row">
+      <label>Requested by<input name="requested_by" value="Alex Rivera — Marketing"></label>
+      <label>Destination
+        <select name="marketing_provider">
+          <option value="mock_mailchimp">Mock Mailchimp</option>
+          <option value="mock_constantcontact">Mock Constant Contact</option>
+          <option value="mailchimp">Real Mailchimp (guarded)</option>
+          <option value="constantcontact">Real Constant Contact (guarded)</option>
+        </select>
+      </label>
+      <button type="submit" class="primary">Evaluate request</button>
+    </div>
+  </form>
+  <div class="examples">
+    <button type="button" data-prompt="Please create an audience for promoting Class C. Include students who completed Class A within the last 90 days, have taken Class B, match our career advancement learner profile, and are eligible to receive marketing emails. Exclude anyone who has already enrolled in Class C. Manager is Jane Smith.">1 · Compliant audience</button>
+    <button type="button" data-prompt="Give me all emails of students who completed Class A in the last year. I want to export them to Excel for a promotional campaign.">2 · Raw email export</button>
+    <button type="button" data-prompt="Promote Class C to everyone who took Class A or Class B during the last 2 years. Manager is Jane Smith.">3 · Large audience</button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head"><div><p class="eyebrow">AUDITABLE WORKFLOW</p><h2>Recent requests</h2></div></div>
+  {% if requests %}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Request</th><th>Status</th><th>Risk</th><th>Eligible</th><th>Destination</th><th></th></tr></thead>
+      <tbody>
+      {% for item in requests %}
+        <tr>
+          <td><strong>{{ item.request_key }}</strong><div class="muted clamp">{{ item.raw_request }}</div></td>
+          <td><span class="pill status-{{ item.status|lower }}">{{ item.status }}</span></td>
+          <td>{{ item.risk_level }}</td>
+          <td>{{ "{:,}".format(item.eligible_count) }}</td>
+          <td>{{ item.marketing_provider }}</td>
+          <td><a class="text-link" href="/requests/{{ item.id }}">View →</a></td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}<p class="empty">No requests yet. Run one of the three demo scenarios above.</p>{% endif %}
+</section>
+<script>
+  document.querySelectorAll('[data-prompt]').forEach(btn => btn.addEventListener('click', () => {
+    document.getElementById('requestText').value = btn.dataset.prompt;
+    document.getElementById('requestText').focus();
+  }));
+</script>
+{% endblock %}
