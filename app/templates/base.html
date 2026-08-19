@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AI Audience Ops{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a href="/" class="brand">AI Audience Ops</a>
+    <div class="topmeta">LearnDash → Policy → Approval → Marketing</div>
+  </header>
+  <main class="shell">{% block content %}{% endblock %}</main>
+  <footer class="footer">Synthetic reference implementation. No real student data is included.</footer>
+</body>
+</html>

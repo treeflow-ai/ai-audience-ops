@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-audience-ops"
+version = "0.1.2"
+description = "Production-style demo for governed AI audience requests across LearnDash and marketing platforms."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "sqlalchemy>=2.0,<3",
+  "jinja2>=3.1,<4",
+  "httpx>=0.27,<1",
+  "python-multipart>=0.0.9,<1",
+  "pydantic>=2.8,<3",
+  "python-dotenv>=1.0,<2",
+]
+
+[project.optional-dependencies]
+llm = ["openai>=2.0,<3"]
+dev = ["pytest>=8,<10"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.setuptools.packages.find]
+include = ["app*"]
+
+[tool.setuptools.package-data]
+app = ["templates/*.html", "static/*.css"]
+
+[project.urls]
+"Short demo" = "https://youtu.be/9STwVwbaNr0"
+"Engineering demo" = "https://youtu.be/eUC1dkTPuW0"
