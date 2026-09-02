@@ -13,6 +13,7 @@ from app.models import AudienceMember, AuditEvent, Student
 from app.schemas import AudienceIntent
 from app.seed import seed_synthetic_data
 from app.services import AudienceService
+from app.workflow import WorkflowState
 
 RAW = "Give me all emails of students who completed Class A in the last year. I want to export them to Excel for a promotional campaign."
 VALID = "Please create an audience for promoting Class C. Include students who completed Class A within the last 90 days, have taken Class B, match our career advancement learner profile, and are eligible to receive marketing emails. Exclude anyone who has already enrolled in Class C. Manager is Jane Smith."
@@ -36,7 +37,7 @@ def test_blocked_form_redirect_no_detached_instance_error(demo):
 
         detail = client.get(response.headers["location"])
         assert detail.status_code == 200
-        assert "BLOCKED" in detail.text
+        assert WorkflowState.BLOCKED.value in detail.text
         assert "Request blocked" in detail.text
 
 
@@ -54,7 +55,8 @@ def test_blocked_api_response_serializes_after_commit(demo):
         )
         assert response.status_code == 201
         payload = response.json()
-        assert payload["status"] == "BLOCKED"
+        assert payload["status"] == WorkflowState.BLOCKED.value
+        assert WorkflowState(payload["status"]) is WorkflowState.BLOCKED
         assert payload["eligible_count"] == 0
         assert any(event["event_type"] == "REQUEST_BLOCKED" for event in payload["audit_events"])
 

@@ -14,6 +14,7 @@ from .policy import PolicyEngine
 from .query_engine import AudienceQueryEngine
 from .retrieval import PolicyRetriever
 from .schemas import PolicyCheck
+from .workflow import WorkflowState
 
 
 
@@ -55,7 +56,7 @@ class AudienceService:
             requested_by=requested_by,
             manager=intent.manager,
             marketing_provider=marketing_provider,
-            status="BLOCKED" if blocked else "EVALUATING",
+            status=WorkflowState.BLOCKED if blocked else WorkflowState.EVALUATING,
             risk_level="HIGH" if blocked else "LOW",
             confidence=round(intent.confidence * 100),
             eligible_count=0,
@@ -89,19 +90,19 @@ class AudienceService:
         request.policy_json = json.dumps([c.model_dump() for c in checks], indent=2)
 
         if any(c.result == "BLOCK" for c in post_checks):
-            request.status = "BLOCKED"
+            request.status = WorkflowState.BLOCKED
             request.risk_level = "HIGH"
             self._audit(request, "REQUEST_BLOCKED", "Policy engine", self._blocked_summary(post_checks))
         elif any(c.result == "REVIEW" for c in post_checks):
-            request.status = "REVIEW_REQUIRED"
+            request.status = WorkflowState.REVIEW_REQUIRED
             request.risk_level = "MEDIUM"
             self._audit(request, "APPROVAL_REQUIRED", "Policy engine", f"Manager approval required from {intent.manager}.")
         else:
-            request.status = "READY_TO_SYNC"
+            request.status = WorkflowState.READY_TO_SYNC
             request.risk_level = "LOW"
             self._audit(request, "AUTO_RELEASE_ELIGIBLE", "Policy engine", "All deterministic checks passed; audience may be synced.")
 
-        if request.status != "BLOCKED":
+        if request.status is not WorkflowState.BLOCKED:
             self.session.add_all([AudienceMember(request_id=request.id, student_id=sid) for sid in member_ids])
 
         self.session.commit()
@@ -109,11 +110,11 @@ class AudienceService:
 
     def approve(self, request_id: int, approver: str) -> AudienceRequest:
         request = self.get_request(request_id)
-        if request.status != "REVIEW_REQUIRED":
-            raise ValueError(f"Request is not awaiting approval (status={request.status}).")
+        if not request.status.requires_approval:
+            raise ValueError(f"Request is not awaiting approval (status={request.status.value}).")
         if request.manager and approver.strip().lower() != request.manager.strip().lower():
             raise ValueError(f"Approval must come from the identified manager: {request.manager}.")
-        request.status = "APPROVED"
+        request.status = WorkflowState.APPROVED
         request.approved_by = approver
         request.approved_at = datetime.now(timezone.utc)
         self._audit(request, "APPROVED", approver, f"Audience of {request.eligible_count:,} recipients approved for release.")
@@ -122,8 +123,8 @@ class AudienceService:
 
     def sync(self, request_id: int) -> AudienceRequest:
         request = self.get_request(request_id)
-        if request.status not in {"READY_TO_SYNC", "APPROVED", "SYNC_FAILED"}:
-            raise ValueError(f"Request cannot be synced from status={request.status}.")
+        if not request.status.can_sync:
+            raise ValueError(f"Request cannot be synced from status={request.status.value}.")
 
         students = self.session.scalars(
             select(Student)
@@ -144,13 +145,13 @@ class AudienceService:
         try:
             result = adapter.sync(request.request_key, recipients)
         except Exception as exc:
-            request.status = "SYNC_FAILED"
+            request.status = WorkflowState.SYNC_FAILED
             request.sync_detail = str(exc)
             self._audit(request, "SYNC_FAILED", request.marketing_provider, str(exc))
             self.session.commit()
             raise MarketingSyncError(str(exc)) from exc
 
-        request.status = "SYNCED"
+        request.status = WorkflowState.SYNCED
         request.external_segment_id = result.external_segment_id
         request.sync_detail = result.detail
         self._audit(
