@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.llm import MockIntentParser
 from app.services import AudienceService
+from app.workflow import WorkflowState
 
 VALID = "Please create an audience for promoting Class C. Include students who completed Class A within the last 90 days, have taken Class B, match our career advancement learner profile, and are eligible to receive marketing emails. Exclude anyone who has already enrolled in Class C. Manager is Jane Smith."
 RAW = "Give me all emails of students who completed Class A in the last year. I want to export them to Excel for a promotional campaign."
@@ -25,7 +26,7 @@ def test_compliant_audience_is_ready_and_privacy_preserving(demo):
     settings, engine = demo
     with Session(engine) as session:
         item = AudienceService(session, settings).create_request(VALID, "Alex Rivera — Marketing", "mock_mailchimp")
-        assert item.status == "READY_TO_SYNC"
+        assert item.status is WorkflowState.READY_TO_SYNC
         assert item.eligible_count > 0
         assert item.members
         rendered = json.dumps(json.loads(item.policy_json))
@@ -36,7 +37,7 @@ def test_raw_email_export_is_blocked_before_query(demo):
     settings, engine = demo
     with Session(engine) as session:
         item = AudienceService(session, settings).create_request(RAW, "Alex Rivera — Marketing", "mock_mailchimp")
-        assert item.status == "BLOCKED"
+        assert item.status is WorkflowState.BLOCKED
         assert item.eligible_count == 0
         assert not item.members
         assert any(e.event_type == "REQUEST_BLOCKED" for e in item.events)
@@ -47,10 +48,10 @@ def test_large_audience_requires_manager_approval(demo):
     with Session(engine) as session:
         service = AudienceService(session, settings)
         item = service.create_request(LARGE, "Alex Rivera — Marketing", "mock_constantcontact")
-        assert item.status == "REVIEW_REQUIRED"
+        assert item.status is WorkflowState.REVIEW_REQUIRED
         assert item.eligible_count > settings.approval_threshold
         approved = service.approve(item.id, "Jane Smith")
-        assert approved.status == "APPROVED"
+        assert approved.status is WorkflowState.APPROVED
 
 
 def test_mock_sync_does_not_write_emails(demo):
@@ -59,7 +60,7 @@ def test_mock_sync_does_not_write_emails(demo):
         service = AudienceService(session, settings)
         item = service.create_request(VALID, "Alex Rivera — Marketing", "mock_mailchimp")
         synced = service.sync(item.id)
-        assert synced.status == "SYNCED"
+        assert synced.status is WorkflowState.SYNCED
         log = settings.mock_sync_log.read_text(encoding="utf-8")
         assert "@example.edu" not in log
         assert "WP-" not in log

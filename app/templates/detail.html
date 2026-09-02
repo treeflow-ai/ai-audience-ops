@@ -9,7 +9,7 @@
     <p class="lede small">{{ item.raw_request }}</p>
   </div>
   <div class="status-stack">
-    <span class="pill status-{{ item.status|lower }}">{{ item.status }}</span>
+    <span class="pill status-{{ item.status.value|lower }}">{{ item.status.value }}</span>
     <span class="pill neutral">Risk: {{ item.risk_level }}</span>
     <span class="pill neutral">Intent confidence: {{ item.confidence }}%</span>
   </div>
@@ -21,19 +21,19 @@
   <div class="kpi"><span>Destination</span><strong class="smaller">{{ item.marketing_provider }}</strong><small>{{ item.external_segment_id or "not synced" }}</small></div>
 </section>
 
-{% if item.status == 'REVIEW_REQUIRED' %}
+{% if item.status is sameas WorkflowState.REVIEW_REQUIRED %}
 <section class="action-panel warn">
   <div><strong>Human approval required</strong><p>The deterministic policy threshold was exceeded. The audience cannot sync until the identified manager approves it.</p></div>
   <form action="/requests/{{ item.id }}/approve" method="post"><input name="approver" value="{{ item.manager or 'Jane Smith' }}"><button class="primary">Approve audience</button></form>
 </section>
-{% elif item.status in ['READY_TO_SYNC', 'APPROVED', 'SYNC_FAILED'] %}
+{% elif item.status.can_sync %}
 <section class="action-panel good">
   <div><strong>Ready for governed sync</strong><p>Raw email addresses remain hidden in this UI. The integration layer receives only eligible records after all system controls.</p></div>
   <form action="/requests/{{ item.id }}/sync" method="post"><button class="primary">Sync to {{ item.marketing_provider }}</button></form>
 </section>
-{% elif item.status == 'SYNCED' %}
+{% elif item.status is sameas WorkflowState.SYNCED %}
 <section class="action-panel good"><div><strong>Synced</strong><p>{{ item.sync_detail }}</p></div><code>{{ item.external_segment_id }}</code></section>
-{% elif item.status == 'BLOCKED' %}
+{% elif item.status is sameas WorkflowState.BLOCKED %}
 <section class="action-panel danger"><div><strong>Request blocked</strong><p>The system will not produce an audience or expose student contact data when a policy-blocking condition is present.</p></div></section>
 {% endif %}
 

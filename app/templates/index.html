@@ -49,7 +49,7 @@
       {% for item in requests %}
         <tr>
           <td><strong>{{ item.request_key }}</strong><div class="muted clamp">{{ item.raw_request }}</div></td>
-          <td><span class="pill status-{{ item.status|lower }}">{{ item.status }}</span></td>
+          <td><span class="pill status-{{ item.status.value|lower }}">{{ item.status.value }}</span></td>
           <td>{{ item.risk_level }}</td>
           <td>{{ "{:,}".format(item.eligible_count) }}</td>
           <td>{{ item.marketing_provider }}</td>

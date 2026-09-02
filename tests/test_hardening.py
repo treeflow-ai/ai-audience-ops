@@ -11,6 +11,7 @@ from app.adapters.marketing import ConstantContactAdapter, Recipient
 from app.config import Settings
 from app.schemas import AudienceIntent, CourseRule, CreateRequestPayload
 from app.services import AudienceService
+from app.workflow import WorkflowState
 
 VALID = (
     "Please create an audience for promoting Class C. Include students who completed "
@@ -49,7 +50,7 @@ def test_wrong_manager_cannot_approve_large_audience(demo):
     with Session(engine) as session:
         service = AudienceService(session, settings)
         item = service.create_request(LARGE, "Alex Rivera — Marketing", "mock_mailchimp")
-        assert item.status == "REVIEW_REQUIRED"
+        assert item.status is WorkflowState.REVIEW_REQUIRED
         with pytest.raises(ValueError, match="identified manager"):
             service.approve(item.id, "Not Jane")
 
@@ -59,11 +60,11 @@ def test_real_sync_is_disabled_before_any_vendor_call(demo):
     with Session(engine) as session:
         service = AudienceService(session, settings)
         item = service.create_request(VALID, "Alex Rivera — Marketing", "mailchimp")
-        assert item.status == "READY_TO_SYNC"
+        assert item.status is WorkflowState.READY_TO_SYNC
         with pytest.raises(RuntimeError, match="Real marketing sync is disabled"):
             service.sync(item.id)
         failed = service.get_request(item.id)
-        assert failed.status == "SYNC_FAILED"
+        assert failed.status is WorkflowState.SYNC_FAILED
         assert "Real marketing sync is disabled" in (failed.sync_detail or "")
 
 
@@ -173,7 +174,10 @@ def test_api_reports_disabled_real_sync_as_gateway_error(demo):
             },
         )
         assert created.status_code == 201
-        request_id = created.json()["id"]
+        payload = created.json()
+        assert payload["status"] == WorkflowState.READY_TO_SYNC.value
+        assert WorkflowState(payload["status"]) is WorkflowState.READY_TO_SYNC
+        request_id = payload["id"]
         response = client.post(f"/api/requests/{request_id}/sync")
         assert response.status_code == 502
         assert "Real marketing sync is disabled" in response.json()["detail"]
