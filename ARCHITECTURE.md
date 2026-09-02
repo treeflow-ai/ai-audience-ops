@@ -2,7 +2,10 @@
 
 ## Design goal
 
-Demonstrate how an AI feature can sit inside an existing business workflow without becoming the authority for data access, privacy, approvals, or downstream side effects.
+Demonstrate how an AI feature can be integrated into a realistic business workflow without making the model the authority for privacy controls, approval decisions, data access, or downstream side effects.
+
+This repository is a production-minded demo and reference implementation. It is designed to make trust boundaries and engineering trade-offs concrete, rather than to represent a deployed production system.
+
 
 ## Trust boundaries
 
@@ -23,7 +26,7 @@ Neither implementation receives database credentials or an SQL execution tool. O
 
 This is an **explanatory retrieval layer**, not executable policy and not a claim that retrieval itself authorizes access. The allow/block/review decision is implemented separately in deterministic code.
 
-### 3. Deterministic authorization
+### 3. Deterministic policy enforcement
 
 `app/policy.py` enforces rules such as:
 
