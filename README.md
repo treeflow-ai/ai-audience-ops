@@ -2,11 +2,13 @@
 
 **Governed AI workflow for turning natural-language marketing requests into LearnDash audience segments without exposing raw student contact data.**
 
-This public repository is a sanitized reference implementation derived from a real operational need: using AI to interpret audience requests while keeping authorization, privacy, approval, and downstream execution under deterministic application control. It uses synthetic data, mock integrations, and credential-free defaults so the architecture can be reviewed publicly without exposing production data or proprietary implementation details.
+This repository is a production-minded demo of a governed AI audience workflow. It models a realistic marketing operations problem: using AI to interpret audience requests while keeping privacy controls, approval decisions, data access, and downstream execution in deterministic application code.
+
+The project uses synthetic data, mock integrations, and credential-free defaults so the workflow and engineering trade-offs can be explored safely in a public repository. It is intended as a reference implementation and engineering portfolio project, not as a production deployment.
 
 A marketing user describes an audience in plain English. The system converts that request into a constrained intent, applies deterministic policy and data-access controls, evaluates synthetic LearnDash-style activity, routes large audiences to human approval, and syncs only governed recipients to a marketing adapter.
 
-> AI interprets business language. Application code owns authorization, privacy, approval, and downstream side effects.
+> AI interprets business language. Deterministic application code owns policy enforcement, privacy controls, approval state, and downstream side effects. 
 
 ## Demo videos
 
