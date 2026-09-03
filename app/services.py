@@ -90,15 +90,15 @@ class AudienceService:
         request.policy_json = json.dumps([c.model_dump() for c in checks], indent=2)
 
         if any(c.result == "BLOCK" for c in post_checks):
-            request.status = WorkflowState.BLOCKED
+            request.status = request.status.transition_to(WorkflowState.BLOCKED)
             request.risk_level = "HIGH"
             self._audit(request, "REQUEST_BLOCKED", "Policy engine", self._blocked_summary(post_checks))
         elif any(c.result == "REVIEW" for c in post_checks):
-            request.status = WorkflowState.REVIEW_REQUIRED
+            request.status = request.status.transition_to(WorkflowState.REVIEW_REQUIRED)
             request.risk_level = "MEDIUM"
             self._audit(request, "APPROVAL_REQUIRED", "Policy engine", f"Manager approval required from {intent.manager}.")
         else:
-            request.status = WorkflowState.READY_TO_SYNC
+            request.status = request.status.transition_to(WorkflowState.READY_TO_SYNC)
             request.risk_level = "LOW"
             self._audit(request, "AUTO_RELEASE_ELIGIBLE", "Policy engine", "All deterministic checks passed; audience may be synced.")
 
@@ -114,7 +114,7 @@ class AudienceService:
             raise ValueError(f"Request is not awaiting approval (status={request.status.value}).")
         if request.manager and approver.strip().lower() != request.manager.strip().lower():
             raise ValueError(f"Approval must come from the identified manager: {request.manager}.")
-        request.status = WorkflowState.APPROVED
+        request.status = request.status.transition_to(WorkflowState.APPROVED)
         request.approved_by = approver
         request.approved_at = datetime.now(timezone.utc)
         self._audit(request, "APPROVED", approver, f"Audience of {request.eligible_count:,} recipients approved for release.")
@@ -145,13 +145,13 @@ class AudienceService:
         try:
             result = adapter.sync(request.request_key, recipients)
         except Exception as exc:
-            request.status = WorkflowState.SYNC_FAILED
+            request.status = request.status.transition_to(WorkflowState.SYNC_FAILED)
             request.sync_detail = str(exc)
             self._audit(request, "SYNC_FAILED", request.marketing_provider, str(exc))
             self.session.commit()
             raise MarketingSyncError(str(exc)) from exc
 
-        request.status = WorkflowState.SYNCED
+        request.status = request.status.transition_to(WorkflowState.SYNCED)
         request.external_segment_id = result.external_segment_id
         request.sync_detail = result.detail
         self._audit(
