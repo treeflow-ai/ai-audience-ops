@@ -9,6 +9,7 @@ from app.config import Settings
 from app.db import build_engine, init_db
 from app.seed import seed_synthetic_data
 from app.services import AudienceService
+from app.workflow import WorkflowState
 
 SCENARIOS = [
     (
@@ -36,13 +37,13 @@ def main() -> None:
         for title, prompt in SCENARIOS:
             item = service.create_request(prompt, "Alex Rivera — Marketing", "mock_mailchimp")
             print(f"\n=== {title} ===")
-            print(f"{item.request_key}: status={item.status}, risk={item.risk_level}, eligible={item.eligible_count:,}")
-            if item.status == "REVIEW_REQUIRED":
+            print(f"{item.request_key}: status={item.status.value}, risk={item.risk_level}, eligible={item.eligible_count:,}")
+            if item.status is WorkflowState.REVIEW_REQUIRED:
                 item = service.approve(item.id, "Jane Smith")
-                print(f"approved -> {item.status}")
-            if item.status in {"READY_TO_SYNC", "APPROVED"}:
+                print(f"approved -> {item.status.value}")
+            if item.status in {WorkflowState.READY_TO_SYNC, WorkflowState.APPROVED}:
                 item = service.sync(item.id)
-                print(f"sync -> {item.status}, destination={item.external_segment_id}")
+                print(f"sync -> {item.status.value}, destination={item.external_segment_id}")
 
 
 if __name__ == "__main__":

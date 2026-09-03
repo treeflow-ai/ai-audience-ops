@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, Enum as SqlEnum, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from .workflow import WorkflowState
 
 
 def utcnow() -> datetime:
@@ -55,6 +57,17 @@ class Enrollment(Base):
     course: Mapped[Course] = relationship(back_populates="enrollments")
 
 
+WORKFLOW_STATE_DB_TYPE = SqlEnum(
+    WorkflowState,
+    name="workflow_state",
+    native_enum=False,
+    create_constraint=False,
+    validate_strings=True,
+    values_callable=lambda enum_cls: [state.value for state in enum_cls],
+    length=32,
+)
+
+
 class AudienceRequest(Base):
     __tablename__ = "audience_requests"
 
@@ -64,7 +77,7 @@ class AudienceRequest(Base):
     requested_by: Mapped[str] = mapped_column(String(120))
     manager: Mapped[str | None] = mapped_column(String(120), nullable=True)
     marketing_provider: Mapped[str] = mapped_column(String(40), default="mock_mailchimp")
-    status: Mapped[str] = mapped_column(String(32), index=True)
+    status: Mapped[WorkflowState] = mapped_column(WORKFLOW_STATE_DB_TYPE, index=True)
     risk_level: Mapped[str] = mapped_column(String(16), default="LOW")
     confidence: Mapped[int] = mapped_column(Integer, default=0)
     eligible_count: Mapped[int] = mapped_column(Integer, default=0)

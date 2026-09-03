@@ -7,6 +7,7 @@ build/
 dist/
 .pytest_cache/
 .coverage
+2 ai-audience-ops video/
 htmlcov/
 
 # Local configuration / secrets

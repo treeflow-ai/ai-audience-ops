@@ -16,9 +16,11 @@ from .db import build_engine, init_db
 from .schemas import ApprovalPayload, CreateRequestPayload
 from .seed import seed_synthetic_data
 from .services import AudienceService, MarketingSyncError
+from .workflow import WorkflowState
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+TEMPLATES.env.globals["WorkflowState"] = WorkflowState
 
 
 def _decorate(request_obj):
@@ -129,7 +131,7 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
                 {
                     "id": r.id,
                     "request_key": r.request_key,
-                    "status": r.status,
+                    "status": r.status.value,
                     "risk_level": r.risk_level,
                     "eligible_count": r.eligible_count,
                     "marketing_provider": r.marketing_provider,
@@ -187,7 +189,7 @@ def _api_request(obj):
         "requested_by": obj.requested_by,
         "manager": obj.manager,
         "marketing_provider": obj.marketing_provider,
-        "status": obj.status,
+        "status": obj.status.value,
         "risk_level": obj.risk_level,
         "confidence": obj.confidence,
         "eligible_count": obj.eligible_count,
