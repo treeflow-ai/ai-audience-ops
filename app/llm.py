@@ -1,11 +1,25 @@
 from __future__ import annotations
 
-import json
 import re
 from abc import ABC, abstractmethod
 
+from pydantic import ValidationError
+
 from .config import Settings
+from .llm_boundary import (
+    LLMAudienceIntent,
+    LLMBoundaryError,
+    MAX_LLM_ATTEMPTS,
+    detect_raw_email_export,
+    safe_boundary_error,
+    validate_llm_intent,
+)
 from .schemas import AudienceIntent, CourseRule
+
+
+MAX_LLM_OUTPUT_TOKENS = 1200
+OPENAI_TIMEOUT_SECONDS = 20.0
+OPENAI_TRANSPORT_RETRIES = 1
 
 
 def _course(label: str) -> str:
@@ -28,18 +42,7 @@ class MockIntentParser(IntentParser):
 
     def parse(self, text: str) -> AudienceIntent:
         lower = text.lower()
-        raw_export = bool(
-            re.search(
-                r"\b(list|give|export|download|show|display|dump|extract|provide|return)\b.{0,50}"
-                r"\b(email|emails|email address|email addresses)\b",
-                lower,
-            )
-            or re.search(
-                r"\b(email|emails|email address|email addresses)\b.{0,40}"
-                r"\b(export|download|list|spreadsheet|excel|csv)\b",
-                lower,
-            )
-        )
+        raw_export = detect_raw_email_export(text)
 
         manager = None
         m = re.search(r"manager(?:\s+is|\s*:)?\s+([A-Z][a-z]+\s+[A-Z][a-z]+)", text, re.I)
@@ -126,10 +129,11 @@ class MockIntentParser(IntentParser):
 
 
 class OpenAIIntentParser(IntentParser):
-    """Optional real-LLM mode using the OpenAI Responses API.
+    """Real-LLM parser with a fail-closed application trust boundary.
 
-    The model is used only for natural-language interpretation. It does not
-    receive database credentials and never executes SQL.
+    Structured Outputs enforce the provider-facing shape. The application then
+    independently validates grounding, semantic consistency, system-owned
+    controls, and sensitive export intent before constructing ``AudienceIntent``.
     """
 
     def __init__(self, settings: Settings):
@@ -138,38 +142,66 @@ class OpenAIIntentParser(IntentParser):
     def parse(self, text: str) -> AudienceIntent:
         from openai import OpenAI
 
-        client = OpenAI()
-        schema_example = AudienceIntent(
-            target_course="Class C",
-            completed_course=CourseRule(course="Class A", within_days=90),
-            taken_courses=["Class B"],
-            learner_profile="career_advancement",
-            manager="Jane Smith",
-            confidence=0.95,
-        ).model_dump()
-        instructions = f"""
-You convert a marketing audience request into constrained JSON.
-Return JSON only, no markdown. Use course names like 'Class A'.
-Do not invent criteria that were not requested, except these mandatory system
-controls must remain true: marketing_consent_required, active_account_required,
-exclude_suppressed, exclude_target_course.
-Set raw_email_export=true and request_type='raw_export' if the user asks to list,
-export, download, or expose raw student emails.
-For 'last N years/months/days', convert the period to days.
-Use null/empty values when unknown.
-Example shape:
-{json.dumps(schema_example, indent=2)}
-""".strip()
-        response = client.responses.create(
-            model=self.settings.openai_model,
-            instructions=instructions,
-            input=text,
+        client = OpenAI(
+            timeout=OPENAI_TIMEOUT_SECONDS,
+            max_retries=OPENAI_TRANSPORT_RETRIES,
         )
-        raw = response.output_text.strip()
-        if raw.startswith("```"):
-            raw = re.sub(r"^```(?:json)?\s*|\s*```$", "", raw, flags=re.I | re.S)
-        return AudienceIntent.model_validate(json.loads(raw))
+        instructions = """
+You convert a marketing audience request into a constrained intent object.
+Extract only criteria explicitly present in the user's request. Never invent a
+course, learner profile, manager, time window, or audience filter.
 
+The following application-owned controls MUST be true in your output:
+marketing_consent_required, active_account_required, exclude_suppressed,
+exclude_target_course.
+
+Set raw_email_export=true and request_type='raw_export' when the user asks to
+list, export, download, reveal, or otherwise expose raw student email addresses.
+For explicit time windows, convert years to 365 days and months to 30 days.
+Use null or empty lists when a value is not stated. Confidence is descriptive
+only and never grants permission.
+""".strip()
+
+        last_boundary_error: LLMBoundaryError | None = None
+        for attempt in range(MAX_LLM_ATTEMPTS):
+            attempt_instructions = instructions
+            if attempt:
+                attempt_instructions += (
+                    "\n\nThe previous attempt failed deterministic boundary validation. "
+                    "Re-read the original request and return only explicitly grounded criteria."
+                )
+
+            try:
+                response = client.responses.parse(
+                    model=self.settings.openai_model,
+                    instructions=attempt_instructions,
+                    input=text,
+                    text_format=LLMAudienceIntent,
+                    max_output_tokens=MAX_LLM_OUTPUT_TOKENS,
+                    store=False,
+                )
+
+                if getattr(response, "status", None) == "incomplete":
+                    raise LLMBoundaryError(
+                        "incomplete_model_response",
+                        "Model response was incomplete and was not accepted",
+                    )
+
+                candidate = getattr(response, "output_parsed", None)
+                if candidate is None:
+                    # Covers refusals and responses with no parseable structured
+                    # output. Provider text is intentionally not copied to errors.
+                    raise LLMBoundaryError(
+                        "missing_structured_output",
+                        "Model did not return an acceptable structured intent",
+                    )
+
+                return validate_llm_intent(text, candidate)
+            except (LLMBoundaryError, ValidationError) as exc:
+                last_boundary_error = safe_boundary_error(exc)
+
+        assert last_boundary_error is not None
+        raise last_boundary_error
 
 def get_intent_parser(settings: Settings) -> IntentParser:
     if settings.llm_provider == "openai":
