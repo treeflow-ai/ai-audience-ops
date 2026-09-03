@@ -19,6 +19,19 @@ class WorkflowState(StrEnum):
     SYNC_FAILED = "SYNC_FAILED"
     SYNCED = "SYNCED"
 
+    def transition_to(self, target: "WorkflowState") -> "WorkflowState":
+        """Return ``target`` when this lifecycle transition is legal.
+
+        State construction is intentionally separate: callers creating a new
+        request choose its initial state directly. All changes to an existing
+        request should pass through this method.
+        """
+        if target not in _ALLOWED_TRANSITIONS[self]:
+            raise ValueError(
+                f"Illegal workflow state transition: {self.value} -> {target.value}."
+            )
+        return target
+
     @property
     def requires_approval(self) -> bool:
         return self is WorkflowState.REVIEW_REQUIRED
@@ -30,3 +43,27 @@ class WorkflowState(StrEnum):
             WorkflowState.APPROVED,
             WorkflowState.SYNC_FAILED,
         }
+
+
+_ALLOWED_TRANSITIONS: dict[WorkflowState, frozenset[WorkflowState]] = {
+    WorkflowState.EVALUATING: frozenset({
+        WorkflowState.BLOCKED,
+        WorkflowState.REVIEW_REQUIRED,
+        WorkflowState.READY_TO_SYNC,
+    }),
+    WorkflowState.BLOCKED: frozenset(),
+    WorkflowState.REVIEW_REQUIRED: frozenset({WorkflowState.APPROVED}),
+    WorkflowState.READY_TO_SYNC: frozenset({
+        WorkflowState.SYNC_FAILED,
+        WorkflowState.SYNCED,
+    }),
+    WorkflowState.APPROVED: frozenset({
+        WorkflowState.SYNC_FAILED,
+        WorkflowState.SYNCED,
+    }),
+    WorkflowState.SYNC_FAILED: frozenset({
+        WorkflowState.SYNC_FAILED,
+        WorkflowState.SYNCED,
+    }),
+    WorkflowState.SYNCED: frozenset(),
+}
