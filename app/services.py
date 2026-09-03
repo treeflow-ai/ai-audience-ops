@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session, selectinload
 from .adapters.marketing import Recipient, get_marketing_adapter
 from .config import Settings
 from .llm import get_intent_parser
-from .models import AudienceMember, AudienceRequest, AuditEvent, Student
+from .llm_boundary import validate_domain_references
+from .models import AudienceMember, AudienceRequest, AuditEvent, Course, Student
 from .policy import PolicyEngine
 from .query_engine import AudienceQueryEngine
 from .retrieval import PolicyRetriever
@@ -40,6 +41,13 @@ class AudienceService:
 
     def create_request(self, text: str, requested_by: str, marketing_provider: str) -> AudienceRequest:
         intent = self.parser.parse(text)
+        intent = validate_domain_references(
+            intent,
+            known_courses=list(self.session.scalars(select(Course.name)).all()),
+            known_profiles=list(
+                self.session.scalars(select(Student.learner_profile).distinct()).all()
+            ),
+        )
         # Mandatory governance controls are owned by application code, not by
         # the LLM/parser. Normalize them before policy evaluation or querying.
         intent.marketing_consent_required = True
