@@ -1,12 +1,12 @@
 # AI Audience Ops
 
-**Governed AI workflow for turning natural-language marketing requests into LearnDash audience segments without exposing raw student contact data.**
+**Governed AI audience orchestration for LearnDash with deterministic policy enforcement, validated LLM boundaries, human approval, and durable idempotent marketing sync.**
 
 This repository is a production-minded demo of a governed AI audience workflow. It models a realistic marketing operations problem: using AI to interpret audience requests while keeping privacy controls, approval decisions, data access, and downstream execution in deterministic application code.
 
 The project uses synthetic data, mock integrations, and credential-free defaults so the workflow and engineering trade-offs can be explored safely in a public repository. It is intended as a reference implementation and engineering portfolio project, not as a production deployment.
 
-A marketing user describes an audience in plain English. The system converts that request into a constrained intent, applies deterministic policy and data-access controls, evaluates synthetic LearnDash-style activity, routes large audiences to human approval, and syncs only governed recipients to a marketing adapter.
+A marketing user describes an audience in plain English. The system converts that request into a constrained intent, validates the AI output at an application-owned boundary, applies deterministic policy and data-access controls, evaluates synthetic LearnDash-style activity, routes large audiences to human approval, and releases only governed recipients through a durable, resumable marketing-sync coordinator.
 
 > AI interprets business language. Deterministic application code owns policy enforcement, privacy controls, approval state, and downstream side effects. 
 
@@ -22,19 +22,35 @@ A marketing user describes an audience in plain English. The system converts tha
 ## What the project demonstrates
 
 - Natural-language request → validated `AudienceIntent` schema.
+- Explicit LLM boundary validation before policy evaluation or data access.
 - Deterministic consent, suppression, active-account, and target-course controls.
 - Pre-query refusal of raw-email export requests.
 - Explainable audience funnel over **12,000 deterministic synthetic students**.
 - Human approval for audiences above a configurable threshold.
 - Privacy-preserving mock Mailchimp / Constant Contact sync by default.
-- Durable `SyncJob` / `SyncBatch` coordination with deterministic idempotency keys.
-- Bounded retry/backoff for transient connector failures and checkpoint-based failure recovery.
-- Job/batch leases and heartbeats to reduce duplicate concurrent execution.
+- One durable logical `SyncJob` per governed request, split into persistent `SyncBatch` checkpoints.
+- Deterministic job/batch idempotency keys plus an audience fingerprint bound to the governed snapshot.
+- Bounded exponential retry/backoff for transient connector failures and manual recovery from `SYNC_FAILED`.
+- Job/batch leases and heartbeats to reduce duplicate concurrent execution and recover expired work.
 - Optional guarded adapters for OpenAI, LearnDash, Mailchimp, and Constant Contact.
 - Audit history plus durable sync progress/attempt metadata.
 - Automated pytest coverage and GitHub Actions CI.
 
 The default public-demo path is credential-free: a deterministic mock intent parser, local policy retrieval, SQLite, synthetic data, and mock marketing adapters. The optional OpenAI parser uses the same downstream policy/query workflow, so switching parsers does not give the model direct database or marketing-platform authority.
+
+## Current implementation at a glance
+
+| Area | Current behavior |
+|---|---|
+| AI boundary | Mock or OpenAI intent parsing; output is validated before deterministic policy/query logic runs |
+| Governance | Consent, suppression, account-state, target-course, export-blocking, and approval rules live in application code |
+| Audience data | 12,000 deterministic synthetic learners by default; optional LearnDash adapter |
+| Public request states | `EVALUATING`, `BLOCKED`, `REVIEW_REQUIRED`, `READY_TO_SYNC`, `APPROVED`, `SYNCED`, `SYNC_FAILED` |
+| Sync execution | Synchronous HTTP coordinator backed by durable `SyncJob` / `SyncBatch` persistence |
+| Idempotency | One logical job per request; stable job/batch keys; successful batches are not replayed on recovery |
+| Failure recovery | Transient retry/backoff, persistent attempts/checkpoints, manual retry from `SYNC_FAILED`, expired-lease recovery |
+| Real providers | Mailchimp and Constant Contact adapters are available but real sync is disabled by default |
+| Operations boundary | No production queue/scheduler/dead-letter/monitoring layer; the persistence model is worker-ready, not a full worker platform |
 
 ## Run locally
 
@@ -115,7 +131,8 @@ python scripts/run_demo.py
 ```mermaid
 flowchart LR
     U[Marketing request] --> P[Intent parser]
-    P --> S[Constrained AudienceIntent]
+    P --> V[LLM boundary validation]
+    V --> S[Constrained AudienceIntent]
     S --> R[Policy retrieval]
     S --> G[Deterministic policy engine]
     G -->|blocked| B[Block + audit]
@@ -131,6 +148,7 @@ flowchart LR
     M --> MC[Mailchimp / mock]
     M --> CC[Constant Contact / mock]
     P --> A[(Audit trail)]
+    V --> A
     R --> A
     G --> A
     Q --> A
@@ -147,6 +165,10 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the trust boundaries and state model.
 
 The model boundary is deliberately narrow. A parser may produce a validated intent object, but it cannot execute arbitrary SQL, turn off consent/suppression controls, approve its own request, or directly write to a marketing system. Mandatory controls are normalized by application code after interpretation.
 
+### LLM output is treated as untrusted input
+
+`app/llm_boundary.py` keeps model output outside the authorization boundary. Parsed intent must satisfy the application-owned schema and boundary checks before deterministic policy evaluation, audience queries, approval decisions, or connector side effects can occur. This separation is tested independently in `tests/test_llm_boundary.py`; see [docs/LLM_BOUNDARY_VALIDATION.md](docs/LLM_BOUNDARY_VALIDATION.md).
+
 ### Policy retrieval is explanatory, not enforcement
 
 `app/retrieval.py` performs small local lexical retrieval over the Markdown policy set so the UI can show relevant policy context. The actual allow/block/review decision is implemented separately in deterministic code. This is intentionally described as **policy retrieval**, not as a claim that the retrieved text itself authorizes access.
@@ -161,6 +183,12 @@ The dashboard shows criteria, counts, policy results, approval state, and audit 
 Each governed request maps to one persistent `SyncJob`. Recipients are split into deterministic `SyncBatch` slices with stable idempotency keys and an audience fingerprint. Completed batches are durable checkpoints. Retryable failures use bounded exponential backoff; permanent/unknown failures surface `SYNC_FAILED`; and an operator retry resumes the same logical job without resetting successful batches. Job/batch leases and heartbeats reduce duplicate concurrent work and support recovery after an expired worker lease.
 
 The current demo runs this coordinator synchronously inside the HTTP request. The persistence model is intentionally worker-ready, but a production queue, scheduler, dead-letter flow, and distributed operations layer are outside this repository's scope.
+
+### Public workflow state and durable sync state are separate
+
+The public `AudienceRequest` state machine intentionally does **not** add a `SYNCING` state. In-flight work is represented by `SyncJob.status` and per-batch status instead. A request in `SYNC_FAILED` remains eligible for `POST /api/requests/{id}/sync`; that call resumes the same logical job, preserves `SUCCEEDED` batches, resets failed work for a new recovery round, and keeps lifetime attempt history.
+
+A repeated sync after the durable job has succeeded is a no-op reconciliation rather than a second downstream release. See [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md) for the detailed state flow and provider-specific delivery guarantees.
 
 ### External systems sit behind adapters
 
@@ -188,6 +216,7 @@ ai-audience-ops/
 │   ├── config.py
 │   ├── db.py
 │   ├── llm.py
+│   ├── llm_boundary.py
 │   ├── main.py
 │   ├── models.py
 │   ├── policy.py
@@ -200,6 +229,9 @@ ai-audience-ops/
 ├── scripts/
 ├── tests/
 ├── docs/
+│   ├── LEARNDASH-INTEGRATION.md
+│   ├── LLM_BOUNDARY_VALIDATION.md
+│   └── SYNC_RESILIENCE.md
 ├── .github/workflows/test.yml
 ├── .dockerignore
 ├── Dockerfile
@@ -234,6 +266,27 @@ curl -X POST http://127.0.0.1:8000/api/requests \
     "marketing_provider": "mock_mailchimp"
   }'
 ```
+
+## Configuration
+
+The default mock/demo path does not require a `.env` file. Configuration is read from environment variables, with `.env` loaded only when present. `.env.example` documents the supported overrides.
+
+Core defaults:
+
+```text
+DATABASE_URL=sqlite:///./var/audience_ops.db
+LLM_PROVIDER=mock
+APPROVAL_THRESHOLD=5000
+SYNTHETIC_STUDENT_COUNT=12000
+ALLOW_REAL_MARKETING_SYNC=false
+REAL_SYNC_MAX_RECIPIENTS=500
+SYNC_BATCH_SIZE=100
+SYNC_MAX_ATTEMPTS=3
+SYNC_RETRY_BACKOFF_SECONDS=0.25
+SYNC_LEASE_SECONDS=120
+```
+
+Never commit a real `.env` or provider credentials.
 
 ## Optional OpenAI intent parser
 
@@ -322,7 +375,7 @@ pytest
 
 Tests cover:
 
-- primary intent extraction;
+- primary intent extraction and explicit LLM-boundary validation;
 - compliant audience creation and privacy-preserving mock sync;
 - raw-email blocking before query execution;
 - regression coverage for the detached SQLAlchemy session bug;
@@ -362,6 +415,16 @@ This is a reference implementation, not a compliance certification or a producti
 - production monitoring/alerting.
 
 The repository **does** include synchronous durable batching, bounded transient retries, idempotency keys, leases, and checkpoint recovery; the scope limit above is specifically about production-grade asynchronous execution and operations. See [SECURITY.md](SECURITY.md) and [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md).
+
+## Repository documentation
+
+- [ARCHITECTURE.md](ARCHITECTURE.md) — trust boundaries, state model, and component responsibilities.
+- [SECURITY.md](SECURITY.md) — implemented safeguards, threat assumptions, and production gaps.
+- [docs/LLM_BOUNDARY_VALIDATION.md](docs/LLM_BOUNDARY_VALIDATION.md) — untrusted-model-output boundary and tests.
+- [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md) — idempotency, batching, retry, leases, recovery, and provider guarantees.
+- [docs/LEARNDASH-INTEGRATION.md](docs/LEARNDASH-INTEGRATION.md) — LearnDash adapter assumptions and mapping boundary.
+- [DEMO.md](DEMO.md) — demo scenarios and walkthrough.
+- [CHANGELOG.md](CHANGELOG.md) — notable implementation changes.
 
 ## Reference documentation
 
