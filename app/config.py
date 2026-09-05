@@ -24,13 +24,13 @@ def _env_int(name: str, default: int) -> int:
     return int(os.getenv(name, str(default)))
 
 
+def _env_float(name: str, default: float) -> float:
+    return float(os.getenv(name, str(default)))
+
+
 @dataclass(slots=True)
 class Settings:
-    """Runtime configuration loaded when each Settings instance is created.
-
-    Using factories instead of import-time environment lookups keeps tests and
-    CLI usage predictable when environment variables change between runs.
-    """
+    """Runtime configuration loaded when each Settings instance is created."""
 
     database_url: str = field(default_factory=lambda: _env("DATABASE_URL", "sqlite:///./var/audience_ops.db"))
     llm_provider: str = field(default_factory=lambda: _env("LLM_PROVIDER", "mock"))
@@ -39,6 +39,14 @@ class Settings:
     synthetic_student_count: int = field(default_factory=lambda: _env_int("SYNTHETIC_STUDENT_COUNT", 12000))
     allow_real_marketing_sync: bool = field(default_factory=lambda: _bool("ALLOW_REAL_MARKETING_SYNC", False))
     real_sync_max_recipients: int = field(default_factory=lambda: _env_int("REAL_SYNC_MAX_RECIPIENTS", 500))
+
+    # Durable sync controls. These defaults keep the demo responsive while
+    # making every completed batch a committed recovery checkpoint.
+    sync_batch_size: int = field(default_factory=lambda: _env_int("SYNC_BATCH_SIZE", 100))
+    sync_max_attempts: int = field(default_factory=lambda: _env_int("SYNC_MAX_ATTEMPTS", 3))
+    sync_retry_backoff_seconds: float = field(default_factory=lambda: _env_float("SYNC_RETRY_BACKOFF_SECONDS", 0.25))
+    sync_lease_seconds: int = field(default_factory=lambda: _env_int("SYNC_LEASE_SECONDS", 120))
+
     policy_dir: Path = field(default_factory=lambda: Path(_env("POLICY_DIR", "policies")))
     mock_sync_log: Path = field(default_factory=lambda: Path(_env("MOCK_SYNC_LOG", "var/mock_marketing_syncs.jsonl")))
 
@@ -68,5 +76,13 @@ class Settings:
             raise ValueError("REAL_SYNC_MAX_RECIPIENTS must be greater than zero.")
         if self.constant_contact_activity_timeout_seconds <= 0:
             raise ValueError("CONSTANT_CONTACT_ACTIVITY_TIMEOUT_SECONDS must be greater than zero.")
+        if self.sync_batch_size <= 0:
+            raise ValueError("SYNC_BATCH_SIZE must be greater than zero.")
+        if self.sync_max_attempts <= 0:
+            raise ValueError("SYNC_MAX_ATTEMPTS must be greater than zero.")
+        if self.sync_retry_backoff_seconds < 0:
+            raise ValueError("SYNC_RETRY_BACKOFF_SECONDS must be zero or greater.")
+        if self.sync_lease_seconds <= 0:
+            raise ValueError("SYNC_LEASE_SECONDS must be greater than zero.")
         if self.llm_provider == "openai" and not self.openai_model.strip():
             raise ValueError("OPENAI_MODEL must be configured when LLM_PROVIDER=openai.")

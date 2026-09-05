@@ -27,8 +27,11 @@ A marketing user describes an audience in plain English. The system converts tha
 - Explainable audience funnel over **12,000 deterministic synthetic students**.
 - Human approval for audiences above a configurable threshold.
 - Privacy-preserving mock Mailchimp / Constant Contact sync by default.
+- Durable `SyncJob` / `SyncBatch` coordination with deterministic idempotency keys.
+- Bounded retry/backoff for transient connector failures and checkpoint-based failure recovery.
+- Job/batch leases and heartbeats to reduce duplicate concurrent execution.
 - Optional guarded adapters for OpenAI, LearnDash, Mailchimp, and Constant Contact.
-- Audit history for request, intent, policy, evaluation, approval, and sync state.
+- Audit history plus durable sync progress/attempt metadata.
 - Automated pytest coverage and GitHub Actions CI.
 
 The default public-demo path is credential-free: a deterministic mock intent parser, local policy retrieval, SQLite, synthetic data, and mock marketing adapters. The optional OpenAI parser uses the same downstream policy/query workflow, so switching parsers does not give the model direct database or marketing-platform authority.
@@ -43,13 +46,14 @@ Requires Python 3.11+.
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 python -m pip install -e ".[dev]"
+# Optional: copy only if you want overrides or real integrations
 cp .env.example .env               # Windows PowerShell: Copy-Item .env.example .env
 uvicorn app.main:app --reload
 ```
 
 Open <http://127.0.0.1:8000>.
 
-The first launch creates and seeds the local SQLite database automatically.
+The first launch creates and seeds the local SQLite database automatically. The default mock configuration also works without a `.env` file; `Settings` supplies safe defaults and `load_dotenv()` simply applies a local `.env` when one exists.
 
 ### Option B — Docker
 
@@ -120,8 +124,10 @@ flowchart LR
     Q --> F[Explainable funnel]
     F --> T{Over approval threshold?}
     T -->|yes| H[Manager approval]
-    T -->|no| M[Marketing adapter]
-    H --> M
+    T -->|no| J[Durable sync coordinator]
+    H --> J
+    J --> SJ[(SyncJob + SyncBatch checkpoints)]
+    J --> M[Marketing adapter]
     M --> MC[Mailchimp / mock]
     M --> CC[Constant Contact / mock]
     P --> A[(Audit trail)]
@@ -129,6 +135,7 @@ flowchart LR
     G --> A
     Q --> A
     H --> A
+    J --> A
     M --> A
 ```
 
@@ -148,6 +155,13 @@ The model boundary is deliberately narrow. A parser may produce a validated inte
 
 The dashboard shows criteria, counts, policy results, approval state, and audit metadata. It does not display eligible students' raw email addresses. Mock sync logs are aggregate-only and do not persist contact-level identifiers.
 
+
+### Durable synchronization is a coordinator, not a one-shot call
+
+Each governed request maps to one persistent `SyncJob`. Recipients are split into deterministic `SyncBatch` slices with stable idempotency keys and an audience fingerprint. Completed batches are durable checkpoints. Retryable failures use bounded exponential backoff; permanent/unknown failures surface `SYNC_FAILED`; and an operator retry resumes the same logical job without resetting successful batches. Job/batch leases and heartbeats reduce duplicate concurrent work and support recovery after an expired worker lease.
+
+The current demo runs this coordinator synchronously inside the HTTP request. The persistence model is intentionally worker-ready, but a production queue, scheduler, dead-letter flow, and distributed operations layer are outside this repository's scope.
+
 ### External systems sit behind adapters
 
 The domain workflow depends on adapters rather than vendor-specific calls. The repository includes:
@@ -157,7 +171,9 @@ The domain workflow depends on adapters rather than vendor-specific calls. The r
 - `MailchimpAdapter` for governed list-member upsert + tagging; and
 - `ConstantContactAdapter` for governed V3 list + JSON bulk-import flows.
 
-Real marketing synchronization is **disabled by default** and capped by `REAL_SYNC_MAX_RECIPIENTS`. Constant Contact bulk import is asynchronous at the API level, so the example adapter waits for the activity to complete (or fail/timeout) before reporting the local workflow as synced.
+Real marketing synchronization is **disabled by default** and capped by `REAL_SYNC_MAX_RECIPIENTS`. Synchronization is coordinated through a durable job/batch layer: completed batches are committed as checkpoints, transient failures retry with the same per-batch idempotency key, and a later operator retry resumes unfinished work instead of replaying successful batches.
+
+Mailchimp uses replay-safe member upsert/tag operations for this demo. Constant Contact bulk import is asynchronous at the API level; the adapter checkpoints its list/activity identifiers before polling so recovery can resume the accepted activity when possible. Because the Constant Contact operation used here does not expose a true client-supplied idempotency key, the implementation documents a narrow at-least-once window rather than claiming universal exactly-once delivery. See [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md).
 
 ## Project structure
 
@@ -203,6 +219,7 @@ GET  /api/requests
 GET  /api/requests/{id}
 POST /api/requests/{id}/approve
 POST /api/requests/{id}/sync
+GET  /api/requests/{id}/sync
 GET  /health
 ```
 
@@ -262,6 +279,17 @@ The default cap is 500 recipients:
 export REAL_SYNC_MAX_RECIPIENTS=500
 ```
 
+Durable sync controls also have safe defaults and may be overridden when needed:
+
+```bash
+export SYNC_BATCH_SIZE=100
+export SYNC_MAX_ATTEMPTS=3
+export SYNC_RETRY_BACKOFF_SECONDS=0.25
+export SYNC_LEASE_SECONDS=120
+```
+
+Transient failures are retried within the same logical job and batch identity. `POST /api/requests/{id}/sync` on a `SYNC_FAILED` request starts a recovery round that preserves successful checkpoints. `GET /api/requests/{id}/sync` exposes durable progress and attempt metadata.
+
 ### Mailchimp
 
 Configure:
@@ -284,7 +312,7 @@ CONSTANT_CONTACT_LIST_ID                 # optional; otherwise create a list
 CONSTANT_CONTACT_ACTIVITY_TIMEOUT_SECONDS=60
 ```
 
-The adapter submits the V3 JSON bulk-import activity and polls `/activities/{activity_id}` until completion. Real production use would normally move this work to an asynchronous job/queue rather than holding a web request open.
+The adapter submits the V3 JSON bulk-import activity, checkpoints the returned `activity_id`, and polls `/activities/{activity_id}` until completion. If polling later fails or times out, recovery can resume the checkpointed activity rather than intentionally submitting a new import. Real production use would normally move this durable coordination to an asynchronous job/worker rather than holding a web request open.
 
 ## Testing
 
@@ -300,7 +328,11 @@ Tests cover:
 - regression coverage for the detached SQLAlchemy session bug;
 - application-owned consent/suppression/account/target-course controls;
 - manager approval rules;
-- real-sync safety guards;
+- real-sync safety guards and fail-closed preflight ordering;
+- repeated-sync idempotency and no-replay behavior after success;
+- retryable failure recovery with stable per-batch idempotency keys;
+- preservation of successful batch checkpoints across manual retries;
+- job lease contention/expiry recovery and safe provider retargeting before side effects;
 - configuration/schema validation;
 - repeatable database reset/seed behavior; and
 - privacy-preserving mock log output.
@@ -325,11 +357,11 @@ This is a reference implementation, not a compliance certification or a producti
 - SSO/RBAC or production identity management;
 - security-grade immutable audit storage;
 - database migrations/backups;
-- async connector queues/retries/dead-letter handling;
+- a production asynchronous connector queue/worker, scheduled retry orchestration, and dead-letter handling;
 - organization-specific privacy/legal rules; or
 - production monitoring/alerting.
 
-See [SECURITY.md](SECURITY.md) for the production-hardening boundary.
+The repository **does** include synchronous durable batching, bounded transient retries, idempotency keys, leases, and checkpoint recovery; the scope limit above is specifically about production-grade asynchronous execution and operations. See [SECURITY.md](SECURITY.md) and [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md).
 
 ## Reference documentation
 

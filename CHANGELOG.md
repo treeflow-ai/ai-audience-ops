@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased — Durable sync resilience
+
+Idempotency + Retry/Failure Recovery update.
+
+- Replaced one-shot marketing synchronization with a durable `SyncJob` / `SyncBatch` coordinator.
+- Added one-logical-job-per-request semantics and deterministic job/batch idempotency keys.
+- Added deterministic audience fingerprints so retries remain bound to the governed recipient snapshot.
+- Added configurable batching with `SYNC_BATCH_SIZE`.
+- Added transient failure classification, bounded retries, exponential backoff, and persistent lifetime/per-recovery-round attempt counters.
+- Added job and batch leases plus heartbeats to reduce duplicate concurrent work and permit recovery after worker failure.
+- Preserved successful batch checkpoints across manual retries so completed downstream work is not replayed.
+- Added downstream operation checkpointing for recovery and observability.
+- Updated Mailchimp execution to use replay-safe member upsert/tag behavior per batch.
+- Updated Constant Contact recovery to persist the list/activity identifiers before polling so retries can resume the same accepted import when possible.
+- Added `GET /api/requests/{request_id}/sync` for durable job/batch progress and embedded sync-job information in request API responses.
+- Added `SYNC_MAX_ATTEMPTS`, `SYNC_RETRY_BACKOFF_SECONDS`, and `SYNC_LEASE_SECONDS` configuration controls.
+- Added focused resilience tests for successful replay suppression, failed-batch recovery, transient retries, job lease expiry, enum persistence, and safe provider retargeting before side effects.
+- Fixed Jinja request-detail rendering by explicitly exposing `WorkflowState` to the template context.
+- Ordered real-sync preflight checks so disabled real synchronization fails before recipient-cap validation, matching the safety contract.
+- Updated README, architecture, security, demo, policy, and sync-resilience documentation to reflect the current implementation and its exactly-once limitations.
+
 ## 0.1.2
 
 Public-repository review and integration-hardening release.

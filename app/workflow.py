@@ -1,36 +1,16 @@
 from __future__ import annotations
 
-from enum import StrEnum
+from enum import Enum
 
 
-class WorkflowState(StrEnum):
-    """Lifecycle states for an audience request.
-
-    Values intentionally match the strings already stored in the database and
-    exposed by the API, so adopting the enum is backwards compatible with
-    existing persisted rows and clients.
-    """
-
+class WorkflowState(str, Enum):
     EVALUATING = "EVALUATING"
     BLOCKED = "BLOCKED"
     REVIEW_REQUIRED = "REVIEW_REQUIRED"
     READY_TO_SYNC = "READY_TO_SYNC"
     APPROVED = "APPROVED"
-    SYNC_FAILED = "SYNC_FAILED"
     SYNCED = "SYNCED"
-
-    def transition_to(self, target: "WorkflowState") -> "WorkflowState":
-        """Return ``target`` when this lifecycle transition is legal.
-
-        State construction is intentionally separate: callers creating a new
-        request choose its initial state directly. All changes to an existing
-        request should pass through this method.
-        """
-        if target not in _ALLOWED_TRANSITIONS[self]:
-            raise ValueError(
-                f"Illegal workflow state transition: {self.value} -> {target.value}."
-            )
-        return target
+    SYNC_FAILED = "SYNC_FAILED"
 
     @property
     def requires_approval(self) -> bool:
@@ -44,26 +24,30 @@ class WorkflowState(StrEnum):
             WorkflowState.SYNC_FAILED,
         }
 
-
-_ALLOWED_TRANSITIONS: dict[WorkflowState, frozenset[WorkflowState]] = {
-    WorkflowState.EVALUATING: frozenset({
-        WorkflowState.BLOCKED,
-        WorkflowState.REVIEW_REQUIRED,
-        WorkflowState.READY_TO_SYNC,
-    }),
-    WorkflowState.BLOCKED: frozenset(),
-    WorkflowState.REVIEW_REQUIRED: frozenset({WorkflowState.APPROVED}),
-    WorkflowState.READY_TO_SYNC: frozenset({
-        WorkflowState.SYNC_FAILED,
-        WorkflowState.SYNCED,
-    }),
-    WorkflowState.APPROVED: frozenset({
-        WorkflowState.SYNC_FAILED,
-        WorkflowState.SYNCED,
-    }),
-    WorkflowState.SYNC_FAILED: frozenset({
-        WorkflowState.SYNC_FAILED,
-        WorkflowState.SYNCED,
-    }),
-    WorkflowState.SYNCED: frozenset(),
-}
+    def transition_to(self, target: "WorkflowState") -> "WorkflowState":
+        # Preserve the public request-state contract. Durable in-flight state is
+        # tracked by SyncJob.status=RUNNING rather than adding a public SYNCING
+        # state, so existing API clients and transition tests remain compatible.
+        legal = {
+            WorkflowState.EVALUATING: {
+                WorkflowState.BLOCKED,
+                WorkflowState.REVIEW_REQUIRED,
+                WorkflowState.READY_TO_SYNC,
+            },
+            WorkflowState.REVIEW_REQUIRED: {WorkflowState.APPROVED},
+            WorkflowState.READY_TO_SYNC: {
+                WorkflowState.SYNC_FAILED,
+                WorkflowState.SYNCED,
+            },
+            WorkflowState.APPROVED: {
+                WorkflowState.SYNC_FAILED,
+                WorkflowState.SYNCED,
+            },
+            WorkflowState.SYNC_FAILED: {
+                WorkflowState.SYNC_FAILED,
+                WorkflowState.SYNCED,
+            },
+        }
+        if target not in legal.get(self, set()):
+            raise ValueError(f"Illegal workflow state transition: {self.value} -> {target.value}")
+        return target
