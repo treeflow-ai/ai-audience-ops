@@ -20,7 +20,6 @@ from .workflow import WorkflowState
 
 BASE_DIR = Path(__file__).resolve().parent
 TEMPLATES = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-TEMPLATES.env.globals["WorkflowState"] = WorkflowState
 
 
 def _decorate(request_obj):
@@ -39,16 +38,13 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
     async def lifespan(app: FastAPI):
         init_db(engine)
         with Session(engine) as session:
-            # Seeding is idempotent when student data already exists. Calling it
-            # unconditionally avoids treating a partially initialized database
-            # (for example, courses created but students missing) as healthy.
             seed_synthetic_data(session, count=settings.synthetic_student_count)
         yield
 
     app = FastAPI(
         title="AI Audience Ops",
         version="0.1.2",
-        description="Governed AI audience requests for LearnDash + marketing systems.",
+        description="Governed AI audience requests with durable idempotent marketing sync.",
         lifespan=lifespan,
     )
     app.state.settings = settings
@@ -94,7 +90,7 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
             return TEMPLATES.TemplateResponse(
                 request=request,
                 name="detail.html",
-                context={"item": obj, "settings": settings},
+                context={"item": obj, "settings": settings, "WorkflowState": WorkflowState},
             )
         except LookupError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -178,7 +174,58 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
         except MarketingSyncError as exc:
             raise HTTPException(status_code=502, detail=str(exc)) from exc
 
+    @app.get("/api/requests/{request_id}/sync")
+    def api_sync_status(request_id: int):
+        try:
+            with Session(engine) as session:
+                obj = AudienceService(session, settings).get_request(request_id)
+                return _api_sync_job(obj)
+        except LookupError as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
+
     return app
+
+
+def _api_sync_job(obj):
+    job = obj.sync_job
+    if job is None:
+        return None
+    return {
+        "id": job.id,
+        "idempotency_key": job.idempotency_key,
+        "status": job.status,
+        "provider": job.provider,
+        "audience_fingerprint": job.audience_fingerprint,
+        "batch_size": job.batch_size,
+        "total_recipients": job.total_recipients,
+        "completed_recipients": job.completed_recipients,
+        "total_batches": job.total_batches,
+        "completed_batches": job.completed_batches,
+        "retry_round": job.retry_round,
+        "external_segment_id": job.external_segment_id,
+        "last_error": job.last_error,
+        "lease_expires_at": job.lease_expires_at,
+        "created_at": job.created_at,
+        "started_at": job.started_at,
+        "completed_at": job.completed_at,
+        "batches": [
+            {
+                "batch_index": batch.batch_index,
+                "status": batch.status,
+                "attempts": batch.attempts,
+                "round_attempts": batch.round_attempts,
+                "size": batch.size,
+                "synced_count": batch.synced_count,
+                "idempotency_key": batch.idempotency_key,
+                "external_operation_id": batch.external_operation_id,
+                "last_error": batch.last_error,
+                "next_attempt_at": batch.next_attempt_at,
+                "lease_expires_at": batch.lease_expires_at,
+                "completed_at": batch.completed_at,
+            }
+            for batch in job.batches
+        ],
+    }
 
 
 def _api_request(obj):
@@ -200,6 +247,7 @@ def _api_request(obj):
         "approved_by": obj.approved_by,
         "external_segment_id": obj.external_segment_id,
         "sync_detail": obj.sync_detail,
+        "sync_job": _api_sync_job(obj),
         "audit_events": [
             {
                 "event_type": e.event_type,
