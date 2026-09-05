@@ -18,6 +18,7 @@ A marketing user describes an audience in plain English. The system converts tha
 | **~2 min:** problem, architecture boundary, and three proof points | **~4 min:** architecture, governance, deterministic filtering, approval, and sync |
 
 **Start with the short overview.** The engineering walkthrough goes deeper into why the LLM is intentionally kept outside the authorization and execution boundary.
+> **Note:** The demo videos predate the latest durable sync update. They still reflect the current LLM trust boundary, deterministic policy enforcement, approval workflow, and core product flow. The current repository additionally implements idempotent batch execution, bounded retries, leases, and checkpoint-based failure recovery; see **Key engineering decisions** and [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md).
 
 ## What the project demonstrates
 
