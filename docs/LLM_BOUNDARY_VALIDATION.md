@@ -9,7 +9,7 @@ A model response is accepted only after it passes every gate below.
 4. **Grounding** — course selectors, learner profile, manager, and time windows must be traceable to the original user request. Matching is normalized and token-boundary aware rather than substring based.
 5. **Cross-field semantics** — sensitive export classification fields must agree and the target course cannot simultaneously be a positive selector while target-course exclusion is mandatory.
 6. **Sensitive-intent backstop** — raw email export has a deterministic detector. The LLM can make the classification stricter but cannot downgrade it.
-7. **Authoritative references** — before policy/query execution, course names and learner profiles are checked against database-backed catalogs and canonicalized to stored values.
+7. **Authoritative references** — `AudienceService.create_request()` validates model-selected course names and learner profiles against database-backed catalogs immediately after parsing and before policy/query execution; accepted normalized forms are canonicalized to stored values and unknown references fail closed.
 8. **Fail closed** — boundary failures are retried once from the original user text only. If validation still fails, a stable `LLMBoundaryError` is raised without embedding provider output.
 
 ## Residual trust boundaries

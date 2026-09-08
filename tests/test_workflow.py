@@ -1,10 +1,22 @@
 import json
 
+import pytest
+
 from sqlalchemy.orm import Session
 
 from app.llm import MockIntentParser
+from app.llm_boundary import LLMBoundaryError
+from app.schemas import AudienceIntent, CourseRule
 from app.services import AudienceService
 from app.workflow import WorkflowState
+
+
+class _StaticParser:
+    def __init__(self, intent: AudienceIntent):
+        self.intent = intent
+
+    def parse(self, text: str) -> AudienceIntent:
+        return self.intent.model_copy(deep=True)
 
 VALID = "Please create an audience for promoting Class C. Include students who completed Class A within the last 90 days, have taken Class B, match our career advancement learner profile, and are eligible to receive marketing emails. Exclude anyone who has already enrolled in Class C. Manager is Jane Smith."
 RAW = "Give me all emails of students who completed Class A in the last year. I want to export them to Excel for a promotional campaign."
@@ -20,6 +32,58 @@ def test_parser_extracts_primary_demo_scenario():
     assert intent.learner_profile == "career_advancement"
     assert intent.manager == "Jane Smith"
     assert intent.raw_email_export is False
+
+
+
+def test_service_canonicalizes_authoritative_references_before_policy_and_query(demo):
+    settings, engine = demo
+    with Session(engine) as session:
+        service = AudienceService(session, settings)
+        service.parser = _StaticParser(
+            AudienceIntent(
+                campaign_purpose="Promote Class C",
+                target_course="class c",
+                completed_course=CourseRule(course="class a", within_days=90),
+                taken_courses=["class b"],
+                learner_profile="career advancement",
+                manager="Jane Smith",
+                confidence=0.96,
+            )
+        )
+
+        item = service.create_request(
+            VALID,
+            "Alex Rivera — Marketing",
+            "mock_mailchimp",
+        )
+
+        stored = json.loads(item.intent_json)
+        assert stored["target_course"] == "Class C"
+        assert stored["completed_course"]["course"] == "Class A"
+        assert stored["taken_courses"] == ["Class B"]
+        assert stored["learner_profile"] == "career_advancement"
+
+
+def test_service_fails_closed_on_unknown_authoritative_reference(demo):
+    settings, engine = demo
+    with Session(engine) as session:
+        service = AudienceService(session, settings)
+        service.parser = _StaticParser(
+            AudienceIntent(
+                campaign_purpose="Promote Class Z",
+                target_course="Class Z",
+                confidence=0.90,
+            )
+        )
+
+        with pytest.raises(LLMBoundaryError) as exc_info:
+            service.create_request(
+                "Promote Class Z",
+                "Alex Rivera — Marketing",
+                "mock_mailchimp",
+            )
+
+        assert exc_info.value.code == "unknown_course_reference"
 
 
 def test_compliant_audience_is_ready_and_privacy_preserving(demo):
