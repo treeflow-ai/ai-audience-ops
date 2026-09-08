@@ -19,7 +19,8 @@ from .adapters.marketing import (
 )
 from .config import Settings
 from .llm import get_intent_parser
-from .models import AudienceMember, AudienceRequest, AuditEvent, Student, SyncBatch, SyncJob
+from .llm_boundary import validate_domain_references
+from .models import AudienceMember, AudienceRequest, AuditEvent, Course, Student, SyncBatch, SyncJob
 from .policy import PolicyEngine
 from .query_engine import AudienceQueryEngine
 from .retrieval import PolicyRetriever
@@ -53,6 +54,18 @@ class AudienceService:
 
     def create_request(self, text: str, requested_by: str, marketing_provider: str) -> AudienceRequest:
         intent = self.parser.parse(text)
+        intent = validate_domain_references(
+            intent,
+            known_courses=self.session.scalars(
+                select(Course.name).order_by(Course.name)
+            ).all(),
+            known_profiles=self.session.scalars(
+                select(Student.learner_profile)
+                .where(Student.learner_profile.is_not(None))
+                .distinct()
+                .order_by(Student.learner_profile)
+            ).all(),
+        )
         # Mandatory governance controls are owned by application code, not by
         # the LLM/parser. Normalize them before policy evaluation or querying.
         intent.marketing_consent_required = True
