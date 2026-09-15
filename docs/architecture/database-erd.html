@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI Audience Ops · SQLAlchemy ER Diagram</title>
+  <style>
+    :root {
+      --bg: #09111f;
+      --panel: #0f1b2d;
+      --panel2: #12233a;
+      --text: #eaf2ff;
+      --muted: #91a4bf;
+      --line: #6fa8ff;
+      --pk: #ffd166;
+      --fk: #72e1d1;
+      --uq: #c6a7ff;
+      --idx: #79b8ff;
+      --nullable: #9ba8ba;
+      --danger: #ff8f8f;
+      --shadow: 0 16px 42px rgba(0, 0, 0, .35)
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      overflow: hidden
+    }
+
+    #app {
+      height: 100%;
+      display: grid;
+      grid-template-rows: auto 1fr
+    }
+
+    header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(10, 20, 35, .96);
+      border-bottom: 1px solid #21334c;
+      z-index: 20;
+      backdrop-filter: blur(12px)
+    }
+
+    .title {
+      min-width: 260px
+    }
+
+    .title h1 {
+      font-size: 17px;
+      margin: 0 0 3px
+    }
+
+    .title p {
+      font-size: 12px;
+      margin: 0;
+      color: var(--muted)
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: flex-end
+    }
+
+    button,
+    input {
+      border: 1px solid #2a4160;
+      background: #13243a;
+      color: var(--text);
+      border-radius: 9px;
+      height: 34px;
+      padding: 0 11px;
+      font: inherit;
+      font-size: 12px;
+      outline: none
+    }
+
+    button {
+      cursor: pointer
+    }
+
+    button:hover {
+      background: #19304d;
+      border-color: #42658f
+    }
+
+    .primary {
+      background: #1c5ba7;
+      border-color: #2f78ca
+    }
+
+    .primary:hover {
+      background: #2368bc
+    }
+
+    input {
+      width: 190px
+    }
+
+    .stat {
+      font-size: 11px;
+      color: #a8bbd5;
+      padding: 0 6px;
+      white-space: nowrap
+    }
+
+    main {
+      min-height: 0;
+      position: relative
+    }
+
+    #viewport {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: radial-gradient(circle at 50% 30%, #10223b 0, #09111f 58%, #060b14 100%);
+      cursor: grab;
+      touch-action: none
+    }
+
+    #viewport.panning {
+      cursor: grabbing
+    }
+
+    .edge {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 2;
+      opacity: .56;
+      vector-effect: non-scaling-stroke
+    }
+
+    .edge.one {
+      stroke-dasharray: 0
+    }
+
+    .edge.active {
+      opacity: 1;
+      stroke-width: 3
+    }
+
+    .edge.dim {
+      opacity: .08
+    }
+
+    .edge-label {
+      font-size: 12px;
+      fill: #aecdff;
+      paint-order: stroke;
+      stroke: #09111f;
+      stroke-width: 5px;
+      stroke-linejoin: round;
+      pointer-events: none
+    }
+
+    .node {
+      cursor: move;
+      filter: drop-shadow(0 9px 14px rgba(0, 0, 0, .28))
+    }
+
+    .node .frame {
+      fill: #0f1b2d;
+      stroke: #2e4869;
+      stroke-width: 1.3
+    }
+
+    .node .head {
+      fill: #173251
+    }
+
+    .node:hover .frame,
+    .node.active .frame {
+      stroke: #6fa8ff;
+      stroke-width: 2.2
+    }
+
+    .node.dim {
+      opacity: .16
+    }
+
+    .node text {
+      user-select: none
+    }
+
+    .node-title {
+      font-size: 17px;
+      font-weight: 800;
+      fill: white
+    }
+
+    .node-table {
+      font-size: 11px;
+      fill: #9cb1cc
+    }
+
+    .node-meta {
+      font-size: 10px;
+      fill: #8aa1bd
+    }
+
+    .col-name {
+      font-size: 12px;
+      fill: #edf5ff
+    }
+
+    .col-type {
+      font-size: 10.5px;
+      fill: #8fa7c5
+    }
+
+    .badge {
+      font-size: 8.5px;
+      font-weight: 800;
+      text-anchor: middle;
+      dominant-baseline: central
+    }
+
+    .constraint {
+      font-size: 10px;
+      fill: #aabbd0
+    }
+
+    #help {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      padding: 9px 11px;
+      border: 1px solid #243b59;
+      background: rgba(10, 19, 32, .9);
+      border-radius: 10px;
+      color: #9fb1c8;
+      font-size: 11px;
+      line-height: 1.45;
+      pointer-events: none;
+      box-shadow: var(--shadow)
+    }
+
+    #legend {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      padding: 10px 12px;
+      border: 1px solid #243b59;
+      background: rgba(10, 19, 32, .92);
+      border-radius: 10px;
+      color: #b8c7da;
+      font-size: 11px;
+      box-shadow: var(--shadow)
+    }
+
+    .legend-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin: 4px 0
+    }
+
+    .dot {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 16px;
+      border-radius: 6px;
+      font-size: 8px;
+      font-weight: 800;
+      color: #06111c
+    }
+
+    #support {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      padding: 10px 12px;
+      border: 1px solid #243b59;
+      background: rgba(10, 19, 32, .92);
+      border-radius: 10px;
+      color: #b8c7da;
+      font-size: 11px;
+      line-height: 1.5;
+      box-shadow: var(--shadow);
+      z-index: 8
+    }
+
+    #support b {
+      color: #eef5ff
+    }
+
+    #support code {
+      color: #aecdff
+    }
+
+    #toast {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #142945;
+      border: 1px solid #365b84;
+      padding: 8px 12px;
+      border-radius: 9px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .2s;
+      font-size: 12px;
+      z-index: 50
+    }
+
+    #toast.show {
+      opacity: 1
+    }
+
+    @media(max-width:850px) {
+      header {
+        align-items: flex-start;
+        flex-direction: column
+      }
+
+      .controls {
+        justify-content: flex-start
+      }
+
+      .title {
+        min-width: 0
+      }
+
+      input {
+        width: 160px
+      }
+
+      .stat {
+        display: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <header>
+      <div class="title">
+        <h1>AI Audience Ops · Dynamic ER Diagram</h1>
+        <p>app/models.py · SQLAlchemy ORM</p>
+      </div>
+      <div class="controls">
+        <input id="search" placeholder="Search tables / fields, e.g. request_id" />
+        <button id="fit">Fit to View</button><button id="reset">Reset Layout</button><button id="toggle">Compact
+          Fields</button>
+        <button id="json">Download JSON</button><button id="svg">Export SVG</button>
+        <span class="stat">8 tables · 7 FK edges</span>
+      </div>
+    </header>
+    <main>
+      <svg id="viewport" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6"
+            orient="auto-start-reverse">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#6fa8ff" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#18304b" stroke-width="1" opacity=".34" />
+          </pattern>
+        </defs>
+        <g id="scene">
+          <rect x="-3000" y="-3000" width="9000" height="9000" fill="url(#grid)" />
+          <g id="edges"></g>
+          <g id="nodes"></g>
+        </g>
+      </svg>
+      <div id="support"><b>SQLAlchemy support classes (not tables)</b><br><code>Base</code> ←
+        DeclarativeBase<br><code>WorkflowStateType</code> ← TypeDecorator / VARCHAR(32)</div>
+      <div id="help">Wheel to zoom · Drag the background to pan · Drag table cards to rearrange · Click a table to
+        highlight relationships</div>
+      <div id="legend">
+        <div class="legend-row"><span class="dot" style="background:#ffd166">PK</span> Primary Key</div>
+        <div class="legend-row"><span class="dot" style="background:#72e1d1">FK</span> Foreign Key</div>
+        <div class="legend-row"><span class="dot" style="background:#c6a7ff">UQ</span> Unique</div>
+        <div class="legend-row"><span class="dot" style="background:#79b8ff">IDX</span> Indexed</div>
+      </div>
+      <div id="toast"></div>
+    </main>
+  </div>
+  <script>
+    const schema = {
+      source: "https://github.com/treeflow-ai/ai-audience-ops/blob/main/app/models.py",
+      branch: "main",
+      generated_from: "app/models.py",
+      non_table_sqlalchemy_classes: [
+        { name: "WorkflowStateType", base: "TypeDecorator", note: "Custom VARCHAR-backed SQLAlchemy type for WorkflowState" },
+        { name: "Base", base: "DeclarativeBase", note: "Declarative base; no table" }
+      ],
+      models: [
+        {
+          name: "Student", table: "students", x: 40, y: 50, columns: [
+            ["id", "Integer", ["PK"]], ["external_id", "String(32)", ["UQ", "IDX"]], ["email", "String(255)", ["UQ", "IDX"]], ["first_name", "String(80)", []], ["last_name", "String(80)", []], ["learner_profile", "String(64)", ["IDX"]], ["marketing_consent", "Boolean", ["IDX"], "default=False"], ["email_suppressed", "Boolean", ["IDX"], "default=False"], ["active", "Boolean", ["IDX"], "default=True"]], relationships: ["enrollments → Enrollment[] (delete-orphan)"]
+        },
+        {
+          name: "Course", table: "courses", x: 40, y: 600, columns: [
+            ["id", "Integer", ["PK"]], ["external_id", "String(32)", ["UQ", "IDX"]], ["name", "String(120)", ["UQ", "IDX"]]], relationships: ["enrollments → Enrollment[] (delete-orphan)"]
+        },
+        {
+          name: "Enrollment", table: "enrollments", x: 440, y: 240, columns: [
+            ["id", "Integer", ["PK"]], ["student_id", "Integer", ["FK", "IDX"], "→ students.id · CASCADE"], ["course_id", "Integer", ["FK", "IDX"], "→ courses.id · CASCADE"], ["enrolled_at", "DateTime(tz)", ["IDX"]], ["completed_at", "DateTime(tz)", ["NULL", "IDX"]], ["status", "String(24)", ["IDX"], "default='enrolled'"]], constraints: ["UQ(student_id, course_id) · uq_student_course"], relationships: ["student → Student", "course → Course"]
+        },
+        {
+          name: "AudienceRequest", table: "audience_requests", x: 930, y: 90, columns: [
+            ["id", "Integer", ["PK"]], ["request_key", "String(40)", ["UQ", "IDX"]], ["raw_request", "Text", []], ["requested_by", "String(120)", []], ["manager", "String(120)", ["NULL"]], ["marketing_provider", "String(40)", [], "default='mock_mailchimp'"], ["status", "WorkflowStateType", ["IDX"]], ["risk_level", "String(16)", [], "default='LOW'"], ["confidence", "Integer", [], "default=0"], ["eligible_count", "Integer", [], "default=0"], ["intent_json", "Text", []], ["policy_json", "Text", []], ["funnel_json", "Text", []], ["retrieved_policy_json", "Text", []], ["approved_by", "String(120)", ["NULL"]], ["approved_at", "DateTime(tz)", ["NULL"]], ["external_segment_id", "String(120)", ["NULL"]], ["sync_detail", "Text", ["NULL"]], ["created_at", "DateTime(tz)", ["IDX"], "default=utcnow"], ["updated_at", "DateTime(tz)", [], "default/onupdate=utcnow"]], relationships: ["members → AudienceMember[] (delete-orphan)", "events → AuditEvent[] (delete-orphan)", "sync_job → SyncJob? (1:1, delete-orphan)"]
+        },
+        {
+          name: "AudienceMember", table: "audience_members", x: 1430, y: 80, columns: [
+            ["id", "Integer", ["PK"]], ["request_id", "Integer", ["FK", "IDX"], "→ audience_requests.id · CASCADE"], ["student_id", "Integer", ["FK", "IDX"], "→ students.id · CASCADE"]], constraints: ["UQ(request_id, student_id) · uq_request_student"], relationships: ["request → AudienceRequest", "student → Student"]
+        },
+        {
+          name: "AuditEvent", table: "audit_events", x: 1430, y: 430, columns: [
+            ["id", "Integer", ["PK"]], ["request_id", "Integer", ["FK", "IDX"], "→ audience_requests.id · CASCADE"], ["event_type", "String(50)", ["IDX"]], ["actor", "String(120)", []], ["detail", "Text", []], ["created_at", "DateTime(tz)", ["IDX"], "default=utcnow"]], relationships: ["request → AudienceRequest"]
+        },
+        {
+          name: "SyncJob", table: "sync_jobs", x: 930, y: 970, columns: [
+            ["id", "Integer", ["PK"]], ["request_id", "Integer", ["FK", "UQ", "IDX"], "→ audience_requests.id · CASCADE"], ["idempotency_key", "String(64)", ["UQ", "IDX"]], ["provider", "String(40)", ["IDX"]], ["audience_fingerprint", "String(64)", []], ["status", "String(24)", ["IDX"], "default='PENDING'"], ["batch_size", "Integer", []], ["total_recipients", "Integer", []], ["total_batches", "Integer", []], ["completed_recipients", "Integer", [], "default=0"], ["completed_batches", "Integer", [], "default=0"], ["retry_round", "Integer", [], "default=0"], ["worker_token", "String(64)", ["NULL", "IDX"]], ["lease_expires_at", "DateTime(tz)", ["NULL", "IDX"]], ["external_segment_id", "String(160)", ["NULL"]], ["last_error", "Text", ["NULL"]], ["created_at", "DateTime(tz)", ["IDX"], "default=utcnow"], ["started_at", "DateTime(tz)", ["NULL"]], ["completed_at", "DateTime(tz)", ["NULL"]], ["updated_at", "DateTime(tz)", [], "default/onupdate=utcnow"]], relationships: ["request → AudienceRequest (1:1)", "batches → SyncBatch[] (delete-orphan)"]
+        },
+        {
+          name: "SyncBatch", table: "sync_batches", x: 1430, y: 1030, columns: [
+            ["id", "Integer", ["PK"]], ["job_id", "Integer", ["FK", "IDX"], "→ sync_jobs.id · CASCADE"], ["batch_index", "Integer", []], ["start_offset", "Integer", []], ["size", "Integer", []], ["idempotency_key", "String(64)", ["IDX"]], ["status", "String(24)", ["IDX"], "default='PENDING'"], ["attempts", "Integer", [], "default=0"], ["round_attempts", "Integer", [], "default=0"], ["synced_count", "Integer", [], "default=0"], ["external_operation_id", "String(160)", ["NULL"]], ["external_segment_id", "String(160)", ["NULL"]], ["last_error", "Text", ["NULL"]], ["next_attempt_at", "DateTime(tz)", ["NULL", "IDX"]], ["lease_expires_at", "DateTime(tz)", ["NULL", "IDX"]], ["created_at", "DateTime(tz)", [], "default=utcnow"], ["updated_at", "DateTime(tz)", [], "default/onupdate=utcnow"], ["completed_at", "DateTime(tz)", ["NULL"]]], constraints: ["UQ(job_id, batch_index) · uq_sync_job_batch", "UQ(idempotency_key) · uq_sync_batch_idempotency"], relationships: ["job → SyncJob"]
+        }
+      ],
+      edges: [
+        { from: "Enrollment", to: "Student", fromField: "student_id", toField: "id", label: "N : 1" },
+        { from: "Enrollment", to: "Course", fromField: "course_id", toField: "id", label: "N : 1" },
+        { from: "AudienceMember", to: "AudienceRequest", fromField: "request_id", toField: "id", label: "N : 1" },
+        { from: "AudienceMember", to: "Student", fromField: "student_id", toField: "id", label: "N : 1" },
+        { from: "AuditEvent", to: "AudienceRequest", fromField: "request_id", toField: "id", label: "N : 1" },
+        { from: "SyncJob", to: "AudienceRequest", fromField: "request_id", toField: "id", label: "1 : 1" },
+        { from: "SyncBatch", to: "SyncJob", fromField: "job_id", toField: "id", label: "N : 1" }
+      ]
+    };
+    const svg = document.getElementById('viewport'), scene = document.getElementById('scene'), nodeLayer = document.getElementById('nodes'), edgeLayer = document.getElementById('edges');
+    const NS = 'http://www.w3.org/2000/svg'; let compact = false, activeNode = null;
+    const originals = Object.fromEntries(schema.models.map(m => [m.name, { x: m.x, y: m.y }]));
+    function el(tag, attrs = {}) { const e = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v); return e }
+    function txt(parent, x, y, text, cls) { const t = el('text', { x, y, class: cls }); t.textContent = text; parent.appendChild(t); return t }
+    function badge(g, x, y, label) { const colors = { PK: '#ffd166', FK: '#72e1d1', UQ: '#c6a7ff', IDX: '#79b8ff', NULL: '#9ba8ba' }; const w = label === 'NULL' ? 30 : 24; g.appendChild(el('rect', { x: x - w / 2, y: y - 8, width: w, height: 16, rx: 5, fill: colors[label] || '#789' })); const t = txt(g, x, y + .5, label, 'badge'); t.setAttribute('fill', '#06111c'); return w }
+    function visibleCols(m) { if (!compact) return m.columns; return m.columns.filter(c => c[2].includes('PK') || c[2].includes('FK') || c[2].includes('UQ')) }
+    function dims(m) { const cols = visibleCols(m); const extra = (m.constraints?.length || 0) + (m.relationships?.length || 0); return { w: 360, h: 74 + cols.length * 32 + extra * 20 + 20 } }
+    function renderNodes() {
+      nodeLayer.innerHTML = ''; for (const m of schema.models) {
+        const d = dims(m); m.w = d.w; m.h = d.h; const g = el('g', { class: 'node', 'data-name': m.name, transform: `translate(${m.x} ${m.y})` }); g.appendChild(el('rect', { class: 'frame', x: 0, y: 0, width: d.w, height: d.h, rx: 13 })); g.appendChild(el('path', { class: 'head', d: `M0,13 Q0,0 13,0 H${d.w - 13} Q${d.w},0 ${d.w},13 V56 H0 Z` })); txt(g, 16, 24, m.name, 'node-title'); txt(g, 16, 43, m.table, 'node-table'); txt(g, d.w - 14, 33, `${m.columns.length} cols`, 'node-meta').setAttribute('text-anchor', 'end');
+        let y = 76; for (const c of visibleCols(m)) { txt(g, 16, y, c[0], 'col-name'); txt(g, 156, y, c[1], 'col-type'); let bx = d.w - 16; for (const b of [...c[2]].reverse()) { const bw = (b === 'NULL' ? 30 : 24); badge(g, bx - bw / 2, y - 4, b); bx -= bw + 5 } if (c[3]) { txt(g, 16, y + 14, c[3], 'node-meta') } y += 32 }
+        if (m.constraints?.length) { for (const c of m.constraints) { txt(g, 16, y, c, 'constraint'); y += 20 } }
+        if (m.relationships?.length) { for (const r of m.relationships) { txt(g, 16, y, '↔ ' + r, 'constraint'); y += 20 } }
+        g.addEventListener('pointerdown', e => startNodeDrag(e, m)); g.addEventListener('click', e => { e.stopPropagation(); selectNode(m.name) }); nodeLayer.appendChild(g)
+      } updateEdges(); applySearch();
+    }
+    function port(m, field, target) { const d = dims(m); const i = visibleCols(m).findIndex(c => c[0] === field); const y = m.y + (i >= 0 ? 76 + i * 32 - 4 : 28); const tx = target.x + target.w / 2, sx = m.x + m.w / 2; const x = tx >= sx ? m.x + m.w : m.x; return { x, y } }
+    function updateEdges() { edgeLayer.innerHTML = ''; for (const e of schema.edges) { const a = schema.models.find(m => m.name === e.from), b = schema.models.find(m => m.name === e.to); const p1 = port(a, e.fromField, b), p2 = port(b, e.toField, a); const dx = Math.max(70, Math.abs(p2.x - p1.x) * .48); const c1x = p1.x + (p2.x > p1.x ? dx : -dx), c2x = p2.x + (p2.x > p1.x ? -dx : dx); const path = el('path', { class: 'edge', d: `M${p1.x},${p1.y} C${c1x},${p1.y} ${c2x},${p2.y} ${p2.x},${p2.y}`, 'marker-end': 'url(#arrow)', 'data-from': e.from, 'data-to': e.to }); edgeLayer.appendChild(path); const mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2; const lab = txt(edgeLayer, mx, my - 7, `${e.fromField}  ${e.label}  ${e.toField}`, 'edge-label'); lab.setAttribute('text-anchor', 'middle'); lab.setAttribute('data-from', e.from); lab.setAttribute('data-to', e.to) } applySelection() }
+    let transform = { x: 40, y: 30, k: .64 }; function setTransform() { scene.setAttribute('transform', `translate(${transform.x} ${transform.y}) scale(${transform.k})`) } setTransform();
+    let pan = null; svg.addEventListener('pointerdown', e => { if (e.target.closest?.('.node')) return; if (e.pointerType === 'mouse' && e.button !== 0) return; e.preventDefault(); pan = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, tx: transform.x, ty: transform.y }; svg.setPointerCapture?.(e.pointerId); svg.classList.add('panning'); activeNode = null; applySelection() }); svg.addEventListener('pointermove', e => { if (pan && pan.pointerId === e.pointerId) { transform.x = pan.tx + (e.clientX - pan.x); transform.y = pan.ty + (e.clientY - pan.y); setTransform() } }); const endPan = e => { if (pan && pan.pointerId === e.pointerId) pan = null; svg.classList.remove('panning') }; svg.addEventListener('pointerup', endPan); svg.addEventListener('pointercancel', endPan);
+    svg.addEventListener('wheel', e => { e.preventDefault(); const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top; const old = transform.k, nk = Math.max(.22, Math.min(2.1, old * Math.exp(-e.deltaY * .0012))); transform.x = mx - (mx - transform.x) * (nk / old); transform.y = my - (my - transform.y) * (nk / old); transform.k = nk; setTransform() }, { passive: false });
+    let nd = null; function startNodeDrag(e, m) { if (e.pointerType === 'mouse' && e.button !== 0) return; e.preventDefault(); e.stopPropagation(); nd = { m, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, ox: m.x, oy: m.y }; const target = e.currentTarget; target.setPointerCapture?.(e.pointerId); const move = ev => { if (!nd || nd.pointerId !== ev.pointerId) return; m.x = nd.ox + (ev.clientX - nd.startX) / transform.k; m.y = nd.oy + (ev.clientY - nd.startY) / transform.k; target.setAttribute('transform', `translate(${m.x} ${m.y})`); updateEdges() }; const up = ev => { if (nd && nd.pointerId === ev.pointerId) nd = null; target.removeEventListener('pointermove', move); target.removeEventListener('pointerup', up); target.removeEventListener('pointercancel', up) }; target.addEventListener('pointermove', move); target.addEventListener('pointerup', up); target.addEventListener('pointercancel', up) }
+    function fit() { const xs = schema.models.map(m => m.x), ys = schema.models.map(m => m.y), rs = schema.models.map(m => m.x + dims(m).w), bs = schema.models.map(m => m.y + dims(m).h); const minX = Math.min(...xs) - 80, minY = Math.min(...ys) - 80, maxX = Math.max(...rs) + 80, maxY = Math.max(...bs) + 80; const r = svg.getBoundingClientRect(); const k = Math.min(r.width / (maxX - minX), r.height / (maxY - minY), 1); transform.k = k; transform.x = (r.width - (maxX - minX) * k) / 2 - minX * k; transform.y = (r.height - (maxY - minY) * k) / 2 - minY * k; setTransform() }
+    function selectNode(name) { activeNode = activeNode === name ? null : name; applySelection() }
+    function applySelection() { document.querySelectorAll('.node').forEach(n => { const name = n.dataset.name; if (!activeNode) { n.classList.remove('active', 'dim') } else { const related = new Set([activeNode]); schema.edges.forEach(e => { if (e.from === activeNode) related.add(e.to); if (e.to === activeNode) related.add(e.from) }); n.classList.toggle('active', name === activeNode); n.classList.toggle('dim', !related.has(name)) } }); document.querySelectorAll('.edge,.edge-label').forEach(x => { if (!activeNode) { x.classList.remove('active', 'dim') } else { const hit = x.dataset.from === activeNode || x.dataset.to === activeNode; x.classList.toggle('active', hit); x.classList.toggle('dim', !hit) } }) }
+    function applySearch() { const q = document.getElementById('search').value.trim().toLowerCase(); document.querySelectorAll('.node').forEach(n => { const m = schema.models.find(x => x.name === n.dataset.name); const hay = [m.name, m.table, ...m.columns.flatMap(c => [c[0], c[1], ...(c[2] || []), c[3] || '']), ...(m.constraints || []), ...(m.relationships || [])].join(' ').toLowerCase(); n.style.display = !q || hay.includes(q) ? '' : 'none' }); document.querySelectorAll('.edge,.edge-label').forEach(x => { const a = document.querySelector(`.node[data-name="${x.dataset.from}"]`), b = document.querySelector(`.node[data-name="${x.dataset.to}"]`); x.style.display = (!a || !b || a.style.display === 'none' || b.style.display === 'none') ? 'none' : '' }) }
+    function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1600) }
+    function download(name, text, type) { const blob = new Blob([text], { type }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000) }
+    document.getElementById('fit').onclick = fit; document.getElementById('reset').onclick = () => { for (const m of schema.models) Object.assign(m, originals[m.name]); renderNodes(); fit(); toast('Layout reset') }; document.getElementById('toggle').onclick = () => { compact = !compact; document.getElementById('toggle').textContent = compact ? 'Show All Fields' : 'Compact Fields'; renderNodes(); fit() }; document.getElementById('search').addEventListener('input', applySearch); document.getElementById('json').onclick = () => download('ai_audience_ops_schema.json', JSON.stringify(schema, null, 2), 'application/json'); document.getElementById('svg').onclick = () => { const clone = svg.cloneNode(true); clone.setAttribute('viewBox', '0 0 ' + svg.clientWidth + ' ' + svg.clientHeight); clone.setAttribute('width', svg.clientWidth); clone.setAttribute('height', svg.clientHeight); download('ai_audience_ops_erd.svg', new XMLSerializer().serializeToString(clone), 'image/svg+xml') }; svg.addEventListener('click', () => { activeNode = null; applySelection() }); window.addEventListener('resize', () => { });
+    renderNodes(); requestAnimationFrame(fit);
+  </script>
+</body>
+
+</html>

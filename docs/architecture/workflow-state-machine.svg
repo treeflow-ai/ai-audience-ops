@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1725" height="905" viewBox="0 0 1725 905">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#9fb1cf"/></marker></defs>
+<rect width="100%" height="100%" fill="#08101d"/>
+<text x="28" y="35" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="21" font-weight="700">WorkflowState State Machine</text>
+<path d="M 230.0 338.0 C 280.0 338.0, 280.0 352.5, 330.0 352.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="280.0" y="340.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">create_request · pre-query passes</text>
+<path d="M 230.0 338.0 C 465.0 338.0, 465.0 122.5, 700.0 122.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="465.0" y="225.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">create_request · pre-query BLOCK</text>
+<path d="M 550.0 352.5 C 625.0 352.5, 625.0 122.5, 700.0 122.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="625.0" y="232.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">post-query BLOCK</text>
+<path d="M 550.0 352.5 C 625.0 352.5, 625.0 312.5, 700.0 312.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="625.0" y="327.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">post-query REVIEW</text>
+<path d="M 550.0 352.5 C 625.0 352.5, 625.0 527.5, 700.0 527.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="625.0" y="435.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">all deterministic checks pass</text>
+<path d="M 940.0 312.5 C 1010.0 312.5, 1010.0 307.5, 1080.0 307.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1010.0" y="305.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">approve() · approver == manager</text>
+<path d="M 940.0 527.5 C 1195.0 527.5, 1195.0 412.5, 1450.0 412.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1195.0" y="465.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">all batches SUCCEEDED</text>
+<path d="M 940.0 527.5 C 1010.0 527.5, 1010.0 547.5, 1080.0 547.5" fill="none" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1010.0" y="532.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">terminal sync failure</text>
+<path d="M 1300.0 307.5 C 1375.0 307.5, 1375.0 412.5, 1450.0 412.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1375.0" y="355.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">all batches SUCCEEDED</text>
+<path d="M 1190.0 360.0 C 1190.0 360.0, 1190.0 490.0, 1190.0 490.0" fill="none" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1190.0" y="420.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">terminal sync failure</text>
+<path d="M 1300.0 547.5 C 1375.0 547.5, 1375.0 412.5, 1450.0 412.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1375.0" y="475.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">manual retry/resume succeeds</text>
+<path d="M 1080.0 547.5 C 1190.0 547.5, 1190.0 547.5, 1300.0 547.5" fill="none" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1190.0" y="542.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">retry round fails again</text>
+<path d="M 940.0 527.5 C 1002.5 527.5, 1002.5 785.0, 1065.0 785.0" fill="none" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1002.5" y="651.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">POST /sync</text>
+<path d="M 1190.0 360.0 C 1195.0 360.0, 1195.0 720.0, 1200.0 720.0" fill="none" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1195.0" y="535.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">POST /sync</text>
+<path d="M 1190.0 605.0 C 1195.0 605.0, 1195.0 720.0, 1200.0 720.0" fill="none" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1195.0" y="657.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">POST /sync · resume same job</text>
+<path d="M 1200.0 720.0 C 1380.0 720.0, 1380.0 470.0, 1560.0 470.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1380.0" y="590.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">job SUCCEEDED</text>
+<path d="M 1200.0 720.0 C 1195.0 720.0, 1195.0 605.0, 1190.0 605.0" fill="none" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1195.0" y="657.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">job FAILED</text>
+<rect x="80.0" y="300.0" width="150.0" height="76.0" rx="12" fill="#121c30" stroke="#8798b8" stroke-width="1.5"/>
+<text x="92.0" y="325.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">● Start</text>
+<rect x="330.0" y="300.0" width="220.0" height="105.0" rx="12" fill="#121c30" stroke="#79a7ff" stroke-width="1.5"/>
+<text x="342.0" y="325.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">EVALUATING</text>
+<rect x="700.0" y="70.0" width="220.0" height="105.0" rx="12" fill="#121c30" stroke="#63d9b2" stroke-width="1.5"/>
+<text x="712.0" y="95.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">BLOCKED</text>
+<rect x="700.0" y="255.0" width="240.0" height="115.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="712.0" y="280.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">REVIEW_REQUIRED</text>
+<rect x="700.0" y="470.0" width="240.0" height="115.0" rx="12" fill="#121c30" stroke="#63d9b2" stroke-width="1.5"/>
+<text x="712.0" y="495.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">READY_TO_SYNC</text>
+<rect x="1080.0" y="255.0" width="220.0" height="105.0" rx="12" fill="#121c30" stroke="#63d9b2" stroke-width="1.5"/>
+<text x="1092.0" y="280.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">APPROVED</text>
+<rect x="1080.0" y="490.0" width="220.0" height="115.0" rx="12" fill="#121c30" stroke="#ff8b91" stroke-width="1.5"/>
+<text x="1092.0" y="515.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">SYNC_FAILED</text>
+<rect x="1450.0" y="355.0" width="220.0" height="115.0" rx="12" fill="#121c30" stroke="#63d9b2" stroke-width="1.5"/>
+<text x="1462.0" y="380.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">SYNCED</text>
+<rect x="1065.0" y="720.0" width="270.0" height="130.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1077.0" y="745.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">SyncJob / SyncBatch</text>
+</svg>

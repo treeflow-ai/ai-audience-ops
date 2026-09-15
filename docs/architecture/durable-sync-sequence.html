@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Durable Sync Sequence Diagram</title>
+    <style>
+        :root {
+            --bg: #08101d;
+            --panel: #142039;
+            --border: #2d3d5d;
+            --text: #edf3ff;
+            --muted: #a6b4cf;
+            --blue: #79a7ff;
+            --green: #63d9b2;
+            --red: #ff8b91;
+            --gold: #f0c96b;
+            --purple: #c29cff
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.4 Inter, system-ui, sans-serif
+        }
+
+        button,
+        input {
+            font: inherit
+        }
+
+        .top {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 14px;
+            background: #0b1424;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .brand {
+            min-width: 360px
+        }
+
+        .brand b {
+            display: block
+        }
+
+        .brand span {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .btn {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 9px;
+            cursor: pointer
+        }
+
+        .search {
+            width: 220px;
+            background: #0e1728;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 9px
+        }
+
+        .stage {
+            position: absolute;
+            top: 72px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;
+            user-select: none
+        }
+
+        .stage.pan {
+            cursor: grabbing
+        }
+
+        .world {
+            position: absolute;
+            transform-origin: 0 0
+        }
+
+        .fixedHeader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 118px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 15;
+            background: linear-gradient(180deg, rgba(8, 16, 29, .98) 0%, rgba(8, 16, 29, .94) 78%, rgba(8, 16, 29, 0) 100%)
+        }
+
+        .headerWorld {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0
+        }
+
+        .fixedHeader .lane {
+            top: 12px
+        }
+
+        .lane {
+            position: absolute;
+            top: 30px;
+            width: 190px;
+            height: 68px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: linear-gradient(180deg, #17243d, #121c30);
+            text-align: center;
+            padding: 11px 7px
+        }
+
+        .lane b {
+            font-size: 13px
+        }
+
+        .lane small {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            margin-top: 3px
+        }
+
+        .life {
+            position: absolute;
+            top: 98px;
+            width: 1px;
+            border-left: 1px dashed #53627c
+        }
+
+        .msg {
+            position: absolute;
+            height: 44px
+        }
+
+        .line {
+            position: absolute;
+            top: 20px;
+            height: 2px
+        }
+
+        .arrow {
+            position: absolute;
+            top: 15px;
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent
+        }
+
+        .mlabel {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: max-content;
+            max-width: none;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 10.5px;
+            white-space: nowrap;
+            overflow: visible;
+            text-overflow: clip;
+            padding: 0 6px
+        }
+
+        .idx {
+            position: absolute;
+            left: -28px;
+            top: 8px;
+            color: #8091ad;
+            font-size: 10px
+        }
+
+        .noteBox {
+            position: absolute;
+            border: 1px dashed var(--gold);
+            background: rgba(240, 201, 107, .07);
+            border-radius: 8px;
+            padding: 5px 7px;
+            font-size: 9.5px;
+            color: #d8c98e;
+            top: 30px;
+            max-width: 300px
+        }
+
+        .hit .mlabel {
+            color: #fff4a4;
+            font-weight: 700
+        }
+
+        .footer {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            max-width: 560px;
+            background: rgba(18, 28, 48, .95);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 9px 11px;
+            color: var(--muted);
+            font-size: 10.5px;
+            z-index: 20
+        }
+
+        .footer b {
+            color: var(--text)
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top">
+        <div class="brand"><b>Durable Sync Sequence Diagram</b><span>idempotency · batching · lease · retry · checkpoint
+                recovery</span></div><input id="search" class="search"
+            placeholder="Search messages / participants…"><button id="fit" class="btn">Fit</button><button id="reset"
+            class="btn">Reset</button><button id="json" class="btn">Download JSON</button>
+    </div>
+    <div id="stage" class="stage">
+        <div id="world" class="world">
+            <div id="canvas"></div>
+        </div>
+        <div id="fixedHeader" class="fixedHeader">
+            <div id="headerWorld" class="headerWorld">
+                <div id="headerCanvas"></div>
+            </div>
+        </div>
+    </div>
+    <div id="footer" class="footer"></div>
+    <script>const DATA = { "repository": "treeflow-ai/ai-audience-ops", "title": "Durable Sync Sequence Diagram", "subtitle": "idempotency · batching · lease · retry · checkpoint recovery", "participants": [{ "id": "Caller", "title": "Caller", "subtitle": "POST /sync" }, { "id": "Svc", "title": "AudienceService", "subtitle": "sync coordinator" }, { "id": "DB", "title": "SQLite / ORM", "subtitle": "SyncJob + SyncBatch" }, { "id": "Adapter", "title": "MarketingAdapter", "subtitle": "sync_batch()" }, { "id": "Provider", "title": "Provider", "subtitle": "mock / Mailchimp / CC" }], "messages": [{ "from": "Caller", "to": "Svc", "label": "POST /api/requests/{id}/sync", "type": "normal" }, { "from": "Svc", "to": "DB", "label": "load request + governed AudienceMember ids", "type": "data" }, { "from": "Svc", "to": "Svc", "label": "derive audience fingerprint + job idempotency key", "type": "guard" }, { "from": "Svc", "to": "DB", "label": "get-or-create one SyncJob + deterministic batches", "type": "data", "note": "request_id is unique; successful batches become checkpoints." }, { "from": "Svc", "to": "DB", "label": "atomic acquire job lease", "type": "guard" }, { "from": "Svc", "to": "DB", "label": "if FAILED recovery: reset failed batches only", "type": "data" }, { "from": "Svc", "to": "Svc", "label": "verify snapshot + real-sync cap/enablement preflight", "type": "guard" }, { "from": "Svc", "to": "DB", "label": "job RUNNING + audit SYNC_STARTED/RESUMED", "type": "data" }, { "from": "Svc", "to": "DB", "label": "claim next PENDING/RETRY_PENDING/expired IN_PROGRESS batch", "type": "guard" }, { "from": "Svc", "to": "Adapter", "label": "sync_batch(... same batch idempotency key ...)", "type": "normal" }, { "from": "Adapter", "to": "Provider", "label": "provider call / mock log", "type": "normal" }, { "from": "Provider", "to": "Adapter", "label": "operation/list id accepted", "type": "success" }, { "from": "Adapter", "to": "Svc", "label": "checkpoint_operation(operation_id, segment_id)", "type": "data", "note": "Constant Contact checkpoints activity_id before polling when possible." }, { "from": "Svc", "to": "DB", "label": "commit downstream operation checkpoint", "type": "data" }, { "from": "Adapter", "to": "Svc", "label": "success → SyncResult", "type": "success" }, { "from": "Svc", "to": "DB", "label": "batch SUCCEEDED + synced_count + audit", "type": "data" }, { "from": "Adapter", "to": "Svc", "label": "retryable failure (408/409/425/429/5xx/network/CC timeout)", "type": "failure" }, { "from": "Svc", "to": "DB", "label": "RETRY_PENDING + next_attempt_at + attempt counters", "type": "data" }, { "from": "Svc", "to": "Svc", "label": "bounded exponential backoff", "type": "guard" }, { "from": "Svc", "to": "Adapter", "label": "retry same batch identity", "type": "normal" }, { "from": "Adapter", "to": "Svc", "label": "permanent / unknown error", "type": "failure", "note": "Unknown errors are not blindly retried because side-effect status may be uncertain." }, { "from": "Svc", "to": "DB", "label": "batch/job FAILED; request → SYNC_FAILED", "type": "failure" }, { "from": "Caller", "to": "Svc", "label": "manual POST /sync again", "type": "normal" }, { "from": "Svc", "to": "DB", "label": "same SyncJob; preserve SUCCEEDED batches", "type": "data" }, { "from": "Svc", "to": "DB", "label": "all batches SUCCEEDED → job SUCCEEDED", "type": "success" }, { "from": "Svc", "to": "DB", "label": "request → SYNCED + release lease", "type": "success" }, { "from": "Svc", "to": "Caller", "label": "return durable sync state; repeat-after-success is no-op reconciliation", "type": "success" }], "notes": ["Mailchimp upsert/tag operations used here are replay-safe at contact/tag level.", "Constant Contact has a documented narrow at-least-once window because its bulk import does not expose a true client-supplied idempotency key."], "sources": ["app/services.py", "app/adapters/marketing.py", "docs/SYNC_RESILIENCE.md", "SECURITY.md"] }, W = 1750, H = 1692; let scale = .8, px = 20, py = 10, pan = null; const stage = document.getElementById('stage'), world = document.getElementById('world'), canvas = document.getElementById('canvas'), headerWorld = document.getElementById('headerWorld'), headerCanvas = document.getElementById('headerCanvas'); world.style.width = W + 'px'; world.style.height = H + 'px'; headerWorld.style.width = W + 'px'; headerWorld.style.height = '100px'; const colors = { normal: '#79a7ff', success: '#63d9b2', failure: '#ff8b91', guard: '#f0c96b', ai: '#c29cff', data: '#63d9b2', optional: '#8798b8' }; function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) } const left = 90, right = W - 90, gap = (right - left) / (DATA.participants.length - 1), xs = {}; function render() { canvas.innerHTML = ''; headerCanvas.innerHTML = ''; DATA.participants.forEach((p, i) => { let x = left + i * gap; xs[p.id] = x; let d = document.createElement('div'); d.className = 'lane'; d.style.left = (x - 95) + 'px'; d.innerHTML = `<b>${esc(p.title)}</b><small>${esc(p.subtitle || '')}</small>`; headerCanvas.appendChild(d); let l = document.createElement('div'); l.className = 'life'; l.style.left = x + 'px'; l.style.height = (H - 130) + 'px'; canvas.appendChild(l) }); DATA.messages.forEach((m, i) => { let y = 135 + i * 56, a = xs[m.from], b = xs[m.to], lo = Math.min(a, b), hi = Math.max(a, b), dir = b >= a ? 1 : -1, c = colors[m.type] || colors.normal; let d = document.createElement('div'); d.className = 'msg'; d.dataset.hay = [m.label, m.note || '', m.from, m.to].join(' ').toLowerCase(); d.style.cssText = `left:${lo}px;top:${y}px;width:${hi - lo}px`; let line = document.createElement('div'); line.className = 'line'; line.style.cssText = `left:0;width:${Math.max(1, hi - lo)}px;background:${c};${m.type === 'optional' ? 'border-top:2px dashed ' + c + ';background:none' : ''}`; d.appendChild(line); let ar = document.createElement('div'); ar.className = 'arrow'; ar.style.cssText = dir > 0 ? `right:-1px;border-left:9px solid ${c}` : `left:-1px;border-right:9px solid ${c}`; d.appendChild(ar); let lab = document.createElement('div'); lab.className = 'mlabel'; lab.style.cssText = `left:50%;color:${c}`; lab.textContent = m.label; d.appendChild(lab); let ix = document.createElement('div'); ix.className = 'idx'; ix.textContent = i + 1; d.appendChild(ix); if (m.note) { let n = document.createElement('div'); n.className = 'noteBox'; n.style.left = Math.max(0, (hi - lo) / 2 - 120) + 'px'; n.textContent = m.note; d.appendChild(n) } canvas.appendChild(d) }) } function tr() { world.style.transform = `translate(${px}px,${py}px) scale(${scale})`; headerWorld.style.transform = `translate(${px}px,0px) scale(${scale})` } stage.addEventListener('pointerdown', e => { if (e.pointerType === 'mouse' && e.button !== 0) return; e.preventDefault(); pan = { pointerId: e.pointerId, sx: e.clientX, sy: e.clientY, ox: px, oy: py }; stage.setPointerCapture?.(e.pointerId); stage.classList.add('pan') }); stage.addEventListener('pointermove', e => { if (pan && pan.pointerId === e.pointerId) { px = pan.ox + e.clientX - pan.sx; py = pan.oy + e.clientY - pan.sy; tr() } }); const endPan = e => { if (pan && pan.pointerId === e.pointerId) pan = null; stage.classList.remove('pan') }; stage.addEventListener('pointerup', endPan); stage.addEventListener('pointercancel', endPan); stage.addEventListener('wheel', e => { e.preventDefault(); let r = stage.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, wx = (mx - px) / scale, wy = (my - py) / scale, n = Math.max(.3, Math.min(1.4, scale * (e.deltaY < 0 ? 1.1 : .9))); px = mx - wx * n; py = my - wy * n; scale = n; tr() }, { passive: false }); document.getElementById('fit').onclick = () => { scale = Math.min(stage.clientWidth / (W + 20), stage.clientHeight / (H + 20), .98); px = (stage.clientWidth - W * scale) / 2; py = (stage.clientHeight - H * scale) / 2; tr() }; document.getElementById('reset').onclick = () => { scale = .8; px = 20; py = 10; tr() }; document.getElementById('search').oninput = e => { let q = e.target.value.trim().toLowerCase(); document.querySelectorAll('.msg').forEach(x => x.classList.toggle('hit', !!q && x.dataset.hay.includes(q))) }; function dl() { let b = new Blob([JSON.stringify(DATA, null, 2)], { type: 'application/json' }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = '02_durable_sync_sequence.json'; a.click() } document.getElementById('json').onclick = dl; document.getElementById('footer').innerHTML = `<b>Sources:</b> ${DATA.sources.map(esc).join(' · ')}${DATA.notes.length ? '<br><b>Notes:</b> ' + DATA.notes.map(esc).join(' · ') : ''}`; render(); tr();</script>
+</body>
+
+</html>

@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ai-audience-ops · Testing Architecture / Coverage Map</title>
+    <style>
+        :root {
+            --bg: #08101d;
+            --panel: #121c30;
+            --panel2: #17243d;
+            --border: #2a3b5b;
+            --text: #edf3ff;
+            --muted: #a6b4cf;
+            --ci: #7aa8ff;
+            --fixture: #67d4b1;
+            --test: #c39cff;
+            --prod: #f0c96b;
+            --assert: #ff9575;
+            --tool: #84c6e8;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.42 Inter, system-ui, -apple-system, sans-serif
+        }
+
+        button,
+        input {
+            font: inherit
+        }
+
+        .top {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            background: #0b1424;
+            z-index: 30;
+            position: relative
+        }
+
+        .brand {
+            min-width: 320px
+        }
+
+        .brand b {
+            display: block;
+            font-size: 15px
+        }
+
+        .brand span {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .search {
+            width: 235px;
+            background: #0e1728;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 9px;
+            outline: none
+        }
+
+        .btn {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 8px 10px;
+            cursor: pointer
+        }
+
+        .btn:hover {
+            border-color: var(--ci)
+        }
+
+        .btn.on {
+            box-shadow: inset 0 0 0 1px var(--ci)
+        }
+
+        .legend {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 10px;
+            display: flex;
+            gap: 9px
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px
+        }
+
+        #stage {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 76px;
+            bottom: 0;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;
+            user-select: none
+        }
+
+        #stage.pan {
+            cursor: grabbing
+        }
+
+        #world {
+            position: absolute;
+            width: 1800px;
+            height: 1140px;
+            transform-origin: 0 0
+        }
+
+        svg {
+            position: absolute;
+            inset: 0;
+            width: 1800px;
+            height: 1140px;
+            pointer-events: none;
+            overflow: visible
+        }
+
+        .groupBox {
+            position: absolute;
+            border: 1px dashed #283955;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .012);
+            pointer-events: none
+        }
+
+        .groupLabel {
+            position: absolute;
+            color: #8393b0;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 700;
+            pointer-events: none
+        }
+
+        .node {
+            position: absolute;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: linear-gradient(180deg, var(--panel2), var(--panel));
+            padding: 12px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, .28);
+            cursor: move;
+            user-select: none;
+            transition: opacity .14s, border-color .14s
+        }
+
+        .node.test {
+            border-color: #594b78
+        }
+
+        .node.fixture {
+            border-color: #3e7566
+        }
+
+        .node.tool {
+            border-color: #3f6d83
+        }
+
+        .node.ci,
+        .node.runner {
+            border-color: #465f8e
+        }
+
+        .node.prod {
+            border-color: #776636
+        }
+
+        .node.invariant {
+            border-color: #824f42
+        }
+
+        .node.sel {
+            border-color: #fff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, .14), 0 16px 36px rgba(0, 0, 0, .3)
+        }
+
+        .node.dim {
+            opacity: .13
+        }
+
+        .node.hit {
+            border-color: #fff2a8
+        }
+
+        .title {
+            font-weight: 800;
+            font-size: 14.5px
+        }
+
+        .sub {
+            font-size: 10.5px;
+            color: #b6c4dd;
+            margin-top: 3px
+        }
+
+        .chips {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 8px
+        }
+
+        .chip {
+            font-size: 9px;
+            color: #aab9d2;
+            border: 1px solid var(--border);
+            padding: 2px 5px;
+            border-radius: 999px
+        }
+
+        .edge {
+            fill: none;
+            stroke-width: 1.9
+        }
+
+        .edge.ci,
+        .edge.runner {
+            stroke: var(--ci)
+        }
+
+        .edge.fixture {
+            stroke: var(--fixture)
+        }
+
+        .edge.tool {
+            stroke: var(--tool)
+        }
+
+        .edge.cover {
+            stroke: var(--test)
+        }
+
+        .edge.indirect {
+            stroke: var(--test);
+            stroke-dasharray: 6 5;
+            opacity: .7
+        }
+
+        .edge.assert {
+            stroke: var(--assert)
+        }
+
+        .edge.dim {
+            opacity: .07
+        }
+
+        .label {
+            font-size: 10px;
+            fill: #c8d3e8;
+            paint-order: stroke;
+            stroke: var(--bg);
+            stroke-width: 5px;
+            stroke-linejoin: round
+        }
+
+        #info {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            width: 430px;
+            max-height: 470px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: rgba(18, 28, 48, .98);
+            box-shadow: 0 16px 38px rgba(0, 0, 0, .34);
+            padding: 13px 14px;
+            z-index: 25;
+            display: none
+        }
+
+        #info.show {
+            display: block
+        }
+
+        #info h3 {
+            margin: 0 0 4px
+        }
+
+        .small {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .rel {
+            padding: 7px 0;
+            border-top: 1px solid var(--border);
+            font-size: 11px
+        }
+
+        .testlist {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            color: #cbd6e9;
+            font-size: 10.5px
+        }
+
+        .testlist li {
+            margin: 4px 0
+        }
+
+        #summary {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            width: 455px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(18, 28, 48, .95);
+            padding: 10px 12px;
+            z-index: 24;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        #summary b {
+            color: var(--text)
+        }
+
+        #summary .nums {
+            display: flex;
+            gap: 14px;
+            margin-top: 5px;
+            flex-wrap: wrap
+        }
+
+        .num strong {
+            color: #fff;
+            font-size: 14px
+        }
+
+        @media(max-width:1080px) {
+            .legend {
+                display: none
+            }
+
+            .brand {
+                min-width: 220px
+            }
+
+            .brand span {
+                display: none
+            }
+
+            .search {
+                width: 170px
+            }
+
+            #summary {
+                width: min(455px, calc(100vw - 28px))
+            }
+
+            #info {
+                width: min(430px, calc(100vw - 28px))
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top">
+        <div class="brand"><b>Testing Architecture / Coverage Map</b><span>tests/ + CI</span></div>
+        <input id="search" class="search" placeholder="Search test / module / invariant…">
+        <button class="btn on" id="labelsBtn">Edge labels</button>
+        <button class="btn" id="fit">Fit</button><button class="btn" id="reset">Reset</button>
+        <button class="btn" id="svgBtn">Download SVG</button><button class="btn" id="jsonBtn">Download JSON</button>
+        <div class="legend"><span><i class="dot" style="background:var(--ci)"></i>CI</span><span><i class="dot"
+                    style="background:var(--fixture)"></i>fixture</span><span><i class="dot"
+                    style="background:var(--test)"></i>test→code</span><span><i class="dot"
+                    style="background:var(--assert)"></i>invariant</span></div>
+    </div>
+    <div id="stage">
+        <div id="world">
+            <div id="groups"></div>
+            <svg viewBox="0 0 1800 1140">
+                <defs>
+                    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                        <path d="M0 0 L8 4 L0 8z" fill="#9cb0d0" />
+                    </marker>
+                </defs>
+                <g id="edges"></g>
+                <g id="labels"></g>
+            </svg>
+            <div id="nodes"></div>
+        </div>
+    </div>
+    <div id="info"></div>
+    <div id="summary"><b>Current test suite</b>
+        <div class="nums"><span class="num"><strong>7</strong> test modules</span><span class="num"><strong>50</strong>
+                test functions</span><span class="num"><strong>~101</strong> collected cases</span><span
+                class="num"><strong>3</strong> Python CI versions</span></div>
+        <div style="margin-top:6px">The largest parametrization is the 7×7 WorkflowState matrix (49 cases); the default
+            path requires no provider secrets.</div>
+    </div>
+    <script>
+        const DATA = { "repository": "treeflow-ai/ai-audience-ops", "branch": "main", "generated_on": "2026-09-11", "summary": { "test_modules": 7, "fixture_files": 1, "test_functions": 50, "estimated_collected_cases": 101, "python_ci_versions": ["3.11", "3.12", "3.13"], "estimated_case_executions_per_full_ci_matrix": 303 }, "nodes": [{ "id": "GitHubActions", "title": "GitHub Actions", "subtitle": ".github/workflows/test.yml", "kind": "ci", "x": 45, "y": 95, "w": 250, "h": 110, "detail": "Runs on push and pull_request. Matrix: Python 3.11, 3.12, 3.13 on ubuntu-latest; install dev extras, compileall, then pytest.", "meta": ["push + pull_request", "Python 3.11 / 3.12 / 3.13", "no secrets required"] }, { "id": "PytestConfig", "title": "pytest", "subtitle": "pyproject.toml", "kind": "runner", "x": 45, "y": 260, "w": 250, "h": 105, "detail": "pytest>=8,<10. testpaths=['tests'], pythonpath=['.'], addopts='-q'.", "meta": ["50 test functions", "~101 collected cases", "testpaths = tests"] }, { "id": "CompileAll", "title": "compileall gate", "subtitle": "app + scripts + tests", "kind": "runner", "x": 45, "y": 420, "w": 250, "h": 85, "detail": "CI compiles app, scripts, and tests before pytest to catch syntax/import-level problems early.", "meta": ["pre-pytest CI gate"] }, { "id": "DemoFixture", "title": "demo fixture", "subtitle": "tests/conftest.py", "kind": "fixture", "x": 365, "y": 75, "w": 280, "h": 145, "detail": "Creates a temporary SQLite test.db, Settings(llm_provider='mock', approval_threshold=500, synthetic_student_count=2000), initializes DB, seeds deterministic data, and provides a temporary mock sync log.", "meta": ["tmp_path SQLite", "2,000 synthetic students", "mock LLM", "seed_synthetic_data()"] }, { "id": "TestClient", "title": "FastAPI TestClient", "subtitle": "HTTP / UI integration harness", "kind": "tool", "x": 365, "y": 270, "w": 280, "h": 95, "detail": "Exercises form and REST routes without an external server. Used for API status/error mapping, redirect behavior, health/lifespan, and serialization regressions.", "meta": ["in-process HTTP", "lifespan exercised"] }, { "id": "Monkeypatch", "title": "pytest monkeypatch / fakes", "subtitle": "controlled failure + provider doubles", "kind": "tool", "x": 365, "y": 415, "w": 280, "h": 120, "detail": "Replaces httpx clients, marketing adapter factory, parsers, and transition methods to prove fail-closed behavior and deterministic recovery without real provider calls.", "meta": ["fake httpx clients", "fake adapters", "fake parser", "transition recorder"] }, { "id": "InMemoryDB", "title": "Isolated SQLite", "subtitle": "sqlite+pysqlite:///:memory:", "kind": "fixture", "x": 365, "y": 590, "w": 280, "h": 100, "detail": "Used directly by state/persistence and sync-resilience tests to isolate durable behavior from the full seeded demo fixture.", "meta": ["real SQLAlchemy persistence", "no external DB"] }, { "id": "test_workflow", "title": "test_workflow.py", "subtitle": "scenario / service integration", "kind": "test", "x": 735, "y": 40, "w": 300, "h": 150, "detail": "Primary business workflow coverage: mock intent parsing, authoritative canonicalization, unknown-reference fail-closed behavior, compliant audience, raw-export block, manager approval, and privacy-preserving mock sync.", "meta": ["7 functions", "7 collected cases", "uses demo fixture"], "tests": ["test_parser_extracts_primary_demo_scenario", "test_service_canonicalizes_authoritative_references_before_policy_and_query", "test_service_fails_closed_on_unknown_authoritative_reference", "test_compliant_audience_is_ready_and_privacy_preserving", "test_raw_email_export_is_blocked_before_query", "test_large_audience_requires_manager_approval", "test_mock_sync_does_not_write_emails"] }, { "id": "test_llm_boundary", "title": "test_llm_boundary.py", "subtitle": "LLM trust-boundary unit/security tests", "kind": "test", "x": 735, "y": 230, "w": 300, "h": 155, "detail": "Strict model-output boundary coverage: closed schema, strict typing, system-owned controls, grounding, hallucinations, time windows, contradictions, raw-export upgrade, control chars, authoritative catalogs and canonicalization.", "meta": ["17 functions", "17 collected cases", "no DB required"], "tests": ["test_valid_grounded_intent_is_accepted_and_copied_to_domain_model", "test_closed_schema_rejects_unknown_fields", "test_strict_schema_rejects_type_coercion", "test_provider_schema_requires_all_fields", "test_model_cannot_disable_system_owned_controls", "test_hallucinated_course_is_rejected_even_when_json_is_valid", "test_grounding_uses_token_boundaries_not_substrings", "test_hallucinated_manager_is_rejected_without_prefix_match", "test_hallucinated_time_window_is_rejected", "test_implicit_last_year_is_grounded_as_365_days", "test_target_course_cannot_also_be_positive_selector", "test_sensitive_request_type_fields_must_be_consistent", "test_raw_email_export_is_deterministically_upgraded_if_model_misses_it", "test_control_characters_are_rejected_at_provider_boundary", "test_authoritative_catalog_rejects_unknown_course_even_if_user_named_it", "test_authoritative_catalog_rejects_unknown_profile", "test_authoritative_catalog_canonicalizes_values_before_querying"] }, { "id": "test_hardening", "title": "test_hardening.py", "subtitle": "config / API / adapter safety", "kind": "test", "x": 735, "y": 430, "w": 300, "h": 165, "detail": "Hardening checks across settings/schema validation, wrong-manager rejection, real-sync preflight, Constant Contact completion polling, LearnDash pagination, API 502 mapping, and partial-initialization recovery.", "meta": ["9 functions", "9 collected cases", "monkeypatch + TestClient"], "tests": ["test_settings_reads_environment_when_instance_is_created", "test_settings_rejects_unknown_llm_provider", "test_schema_rejects_invalid_windows_confidence_and_oversized_input", "test_wrong_manager_cannot_approve_large_audience", "test_real_sync_is_disabled_before_any_vendor_call", "test_constant_contact_waits_for_activity_completion", "test_learndash_user_courses_are_paginated", "test_api_reports_disabled_real_sync_as_gateway_error", "test_app_recovers_from_courses_only_partial_initialization"] }, { "id": "test_regressions", "title": "test_regressions.py", "subtitle": "bug + governance regression suite", "kind": "test", "x": 735, "y": 640, "w": 300, "h": 155, "detail": "Protects against detached-session/serialization regressions, raw-email phrasing variants, parser attempts to disable mandatory controls, and repeatable force-seed cleanup.", "meta": ["5 functions", "8 collected cases", "1 test parametrized ×4"], "tests": ["test_blocked_form_redirect_no_detached_instance_error", "test_blocked_api_response_serializes_after_commit", "test_mock_parser_recognizes_raw_email_exposure_variants [×4]", "test_application_forces_mandatory_governance_controls", "test_force_seed_clears_request_children_and_can_be_repeated"] }, { "id": "test_sync_resilience", "title": "test_sync_resilience.py", "subtitle": "durable sync failure/recovery", "kind": "test", "x": 735, "y": 840, "w": 300, "h": 165, "detail": "Focused durable-sync semantics: enum persistence, repeat-sync no replay, checkpoint preservation, retryable same-key retry, lease contention/expiry, and safe provider retargeting before side effects.", "meta": ["6 functions", "6 collected cases", "in-memory DB + fake adapters"], "tests": ["test_workflow_state_round_trips_as_enum", "test_repeated_sync_reuses_same_job_and_does_not_replay_mock_batches", "test_failed_batch_recovery_preserves_successful_checkpoints", "test_retryable_failure_retries_same_batch_key_in_same_job", "test_job_lease_blocks_duplicate_worker_until_expired", "test_failed_provider_can_be_retargeted_only_before_any_side_effect"] }, { "id": "test_workflow_state", "title": "test_workflow_state.py", "subtitle": "enum + persistence contract", "kind": "test", "x": 1090, "y": 75, "w": 290, "h": 135, "detail": "Validates WorkflowState derived behavior and that SQLAlchemy stores strings while ORM loads real WorkflowState enum values, including pre-existing string rows.", "meta": ["3 functions", "3 collected cases", "in-memory DB"], "tests": ["test_workflow_state_behavior", "test_workflow_state_round_trips_as_enum_and_keeps_string_storage", "test_existing_string_statuses_are_loaded_as_enum"] }, { "id": "test_workflow_transitions", "title": "test_workflow_transitions.py", "subtitle": "state-machine contract + business paths", "kind": "test", "x": 1090, "y": 260, "w": 290, "h": 160, "detail": "Exhaustively checks all 7×7 state pairs against the 10 legal transitions, records business transitions to prove service paths use transition_to(), and confirms pre-query BLOCKED is an initial state rather than a transition.", "meta": ["3 functions", "51 collected cases", "49-case transition matrix"], "tests": ["test_workflow_state_transition_matrix [7×7 = 49]", "test_all_business_transition_paths_use_transition_to", "test_pre_query_block_is_an_initial_state_not_a_transition"] }, { "id": "LLM", "title": "app/llm.py", "subtitle": "MockIntentParser", "kind": "prod", "x": 1465, "y": 35, "w": 270, "h": 90, "detail": "Deterministic mock natural-language interpretation; tested directly and through AudienceService." }, { "id": "LLMBoundary", "title": "app/llm_boundary.py", "subtitle": "untrusted output validation", "kind": "prod", "x": 1465, "y": 155, "w": 270, "h": 105, "detail": "Strict provider schema, grounding, system-owned controls, raw-export detection, authoritative reference validation and canonicalization." }, { "id": "SchemasConfig", "title": "schemas.py + config.py", "subtitle": "Pydantic + Settings validation", "kind": "prod", "x": 1465, "y": 290, "w": 270, "h": 100, "detail": "Input constraints and environment/config validation, including provider allowlists and length/range checks." }, { "id": "Service", "title": "app/services.py", "subtitle": "AudienceService", "kind": "prod", "x": 1465, "y": 420, "w": 270, "h": 115, "detail": "Workflow orchestration, approval gates, deterministic controls, persistence, sync coordination, retry/recovery and provider preflight." }, { "id": "PolicyQuery", "title": "policy.py + query_engine.py", "subtitle": "deterministic governance / audience filtering", "kind": "prod", "x": 1465, "y": 565, "w": 270, "h": 105, "detail": "Exercised mainly through AudienceService integration paths: block/review decisions and eligible-member filtering." }, { "id": "MainAPI", "title": "app/main.py", "subtitle": "FastAPI routes + lifespan", "kind": "prod", "x": 1465, "y": 700, "w": 270, "h": 100, "detail": "Form/API endpoints, serialization/error mapping, health and startup recovery paths tested with TestClient." }, { "id": "Workflow", "title": "app/workflow.py", "subtitle": "WorkflowState", "kind": "prod", "x": 1465, "y": 830, "w": 270, "h": 105, "detail": "Enum behavior, legal transition matrix, business-path transition usage and storage contract." }, { "id": "ModelsDBSeed", "title": "models.py + db.py + seed.py", "subtitle": "persistence + deterministic test data", "kind": "prod", "x": 1465, "y": 965, "w": 270, "h": 115, "detail": "SQLAlchemy enum/string persistence, audience members/audit cleanup, repeatable seeding, SyncJob/SyncBatch checkpoints and DB initialization." }, { "id": "Adapters", "title": "adapters/marketing.py + learndash.py", "subtitle": "provider boundaries", "kind": "prod", "x": 1090, "y": 650, "w": 290, "h": 120, "detail": "Constant Contact async activity completion, LearnDash pagination, real-sync safety guard, mock privacy behavior and marketing retry error semantics." }, { "id": "SafetyInvariants", "title": "Safety / governance invariants", "subtitle": "what the suite proves repeatedly", "kind": "invariant", "x": 1090, "y": 850, "w": 290, "h": 170, "detail": "Raw export blocked before query; LLM cannot weaken mandatory controls; unknown/hallucinated references fail closed; wrong manager cannot approve; real sync disabled before vendor call; review/mock logs do not expose recipient identifiers.", "meta": ["fail closed", "privacy preserving", "human approval", "no model authority"] }], "edges": [{ "from": "GitHubActions", "to": "CompileAll", "label": "python -m compileall", "type": "ci" }, { "from": "GitHubActions", "to": "PytestConfig", "label": "pytest × 3 Python versions", "type": "ci" }, { "from": "PytestConfig", "to": "DemoFixture", "label": "collect fixtures/tests", "type": "runner" }, { "from": "PytestConfig", "to": "test_workflow", "label": "collect", "type": "runner" }, { "from": "PytestConfig", "to": "test_llm_boundary", "label": "collect", "type": "runner" }, { "from": "PytestConfig", "to": "test_hardening", "label": "collect", "type": "runner" }, { "from": "PytestConfig", "to": "test_regressions", "label": "collect", "type": "runner" }, { "from": "PytestConfig", "to": "test_sync_resilience", "label": "collect", "type": "runner" }, { "from": "PytestConfig", "to": "test_workflow_state", "label": "collect", "type": "runner" }, { "from": "PytestConfig", "to": "test_workflow_transitions", "label": "collect", "type": "runner" }, { "from": "DemoFixture", "to": "test_workflow", "label": "demo", "type": "fixture" }, { "from": "DemoFixture", "to": "test_hardening", "label": "demo", "type": "fixture" }, { "from": "DemoFixture", "to": "test_regressions", "label": "demo", "type": "fixture" }, { "from": "DemoFixture", "to": "test_workflow_transitions", "label": "demo", "type": "fixture" }, { "from": "TestClient", "to": "test_hardening", "label": "HTTP assertions", "type": "tool" }, { "from": "TestClient", "to": "test_regressions", "label": "form/API regression", "type": "tool" }, { "from": "Monkeypatch", "to": "test_hardening", "label": "fake httpx clients", "type": "tool" }, { "from": "Monkeypatch", "to": "test_sync_resilience", "label": "fake adapters/failures", "type": "tool" }, { "from": "Monkeypatch", "to": "test_workflow_transitions", "label": "record transition_to", "type": "tool" }, { "from": "InMemoryDB", "to": "test_sync_resilience", "label": "durable semantics", "type": "fixture" }, { "from": "InMemoryDB", "to": "test_workflow_state", "label": "enum persistence", "type": "fixture" }, { "from": "test_workflow", "to": "LLM", "label": "parser scenario", "type": "cover" }, { "from": "test_workflow", "to": "LLMBoundary", "label": "canonicalize / fail closed", "type": "cover" }, { "from": "test_workflow", "to": "Service", "label": "create / approve / sync", "type": "cover" }, { "from": "test_workflow", "to": "PolicyQuery", "label": "indirect integration", "type": "indirect" }, { "from": "test_workflow", "to": "Workflow", "label": "states", "type": "cover" }, { "from": "test_llm_boundary", "to": "LLMBoundary", "label": "direct unit/security", "type": "cover" }, { "from": "test_llm_boundary", "to": "SchemasConfig", "label": "strict Pydantic model", "type": "cover" }, { "from": "test_hardening", "to": "SchemasConfig", "label": "settings/schema guards", "type": "cover" }, { "from": "test_hardening", "to": "Service", "label": "approval + real sync guard", "type": "cover" }, { "from": "test_hardening", "to": "MainAPI", "label": "502 + lifespan recovery", "type": "cover" }, { "from": "test_hardening", "to": "Adapters", "label": "CC polling + LD pagination", "type": "cover" }, { "from": "test_regressions", "to": "MainAPI", "label": "redirect + serialization", "type": "cover" }, { "from": "test_regressions", "to": "LLM", "label": "raw exposure variants", "type": "cover" }, { "from": "test_regressions", "to": "Service", "label": "mandatory controls", "type": "cover" }, { "from": "test_regressions", "to": "ModelsDBSeed", "label": "force seed cleanup", "type": "cover" }, { "from": "test_sync_resilience", "to": "Service", "label": "durable sync coordinator", "type": "cover" }, { "from": "test_sync_resilience", "to": "ModelsDBSeed", "label": "SyncJob / SyncBatch", "type": "cover" }, { "from": "test_sync_resilience", "to": "Adapters", "label": "error/idempotency boundary", "type": "cover" }, { "from": "test_sync_resilience", "to": "Workflow", "label": "SYNCED / SYNC_FAILED", "type": "cover" }, { "from": "test_workflow_state", "to": "Workflow", "label": "enum behavior", "type": "cover" }, { "from": "test_workflow_state", "to": "ModelsDBSeed", "label": "string ↔ enum storage", "type": "cover" }, { "from": "test_workflow_transitions", "to": "Workflow", "label": "7×7 matrix", "type": "cover" }, { "from": "test_workflow_transitions", "to": "Service", "label": "all business paths", "type": "cover" }, { "from": "test_workflow", "to": "SafetyInvariants", "label": "privacy + block + approval", "type": "assert" }, { "from": "test_llm_boundary", "to": "SafetyInvariants", "label": "LLM boundary", "type": "assert" }, { "from": "test_hardening", "to": "SafetyInvariants", "label": "preflight / manager / provider", "type": "assert" }, { "from": "test_regressions", "to": "SafetyInvariants", "label": "mandatory controls", "type": "assert" }, { "from": "test_sync_resilience", "to": "SafetyInvariants", "label": "no replay / recovery", "type": "assert" }, { "from": "test_workflow_transitions", "to": "SafetyInvariants", "label": "state contract", "type": "assert" }], "sources": ["tests/conftest.py", "tests/test_workflow.py", "tests/test_llm_boundary.py", "tests/test_hardening.py", "tests/test_regressions.py", "tests/test_sync_resilience.py", "tests/test_workflow_state.py", "tests/test_workflow_transitions.py", ".github/workflows/test.yml", "pyproject.toml"] };
+        const by = Object.fromEntries(DATA.nodes.map(n => [n.id, n]));
+        const pos = Object.fromEntries(DATA.nodes.map(n => [n.id, { x: n.x, y: n.y }]));
+        const orig = JSON.parse(JSON.stringify(pos)); const els = {};
+        let scale = .70, px = 18, py = 8, drag = null, pan = null, selected = null, showLabels = true;
+        const stage = document.getElementById('stage'), world = document.getElementById('world'), nodes = document.getElementById('nodes'), edges = document.getElementById('edges'), labels = document.getElementById('labels'), groups = document.getElementById('groups'), info = document.getElementById('info');
+        function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
+        const groupRects = [
+            { label: 'CI / test runner', x: 20, y: 35, w: 300, h: 500 },
+            { label: 'fixtures / test doubles', x: 340, y: 35, w: 330, h: 690 },
+            { label: 'test modules', x: 705, y: 20, w: 705, h: 1015 },
+            { label: 'production modules under test', x: 1435, y: 20, w: 325, h: 1080 }
+        ];
+        function renderGroups() { groups.innerHTML = ''; groupRects.forEach(g => { let b = document.createElement('div'); b.className = 'groupBox'; b.style.cssText = `left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px`; groups.appendChild(b); let l = document.createElement('div'); l.className = 'groupLabel'; l.style.cssText = `left:${g.x + 14}px;top:${g.y + 9}px`; l.textContent = g.label; groups.appendChild(l) }) }
+        function renderNodes() { nodes.innerHTML = ''; DATA.nodes.forEach(n => { let d = document.createElement('div'); d.className = 'node ' + n.kind; d.dataset.id = n.id; d.style.cssText = `left:${pos[n.id].x}px;top:${pos[n.id].y}px;width:${n.w}px;height:${n.h}px`; d.innerHTML = `<div class="title">${esc(n.title)}</div><div class="sub">${esc(n.subtitle)}</div>${n.meta ? `<div class="chips">${n.meta.slice(0, 4).map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>` : ''}`; nodes.appendChild(d); els[n.id] = d; d.onpointerdown = ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; ev.preventDefault(); ev.stopPropagation(); drag = { id: n.id, pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: pos[n.id].x, oy: pos[n.id].y }; d.setPointerCapture?.(ev.pointerId); select(n.id) }; d.onclick = ev => { ev.stopPropagation(); select(n.id) } }) }
+        function box(id) { let n = by[id], p = pos[id]; return { x: p.x, y: p.y, w: n.w, h: n.h, cx: p.x + n.w / 2, cy: p.y + n.h / 2 } }
+        function anchor(A, B) { let dx = B.cx - A.cx, dy = B.cy - A.cy; if (Math.abs(dx / A.w) > Math.abs(dy / A.h)) return { x: A.cx + (dx > 0 ? A.w / 2 : -A.w / 2), y: A.cy + dy / (Math.abs(dx) || 1) * A.w / 2 }; return { x: A.cx + dx / (Math.abs(dy) || 1) * A.h / 2, y: A.cy + (dy > 0 ? A.h / 2 : -A.h / 2) } }
+        function geom(ed) { let A = box(ed.from), B = box(ed.to), p1 = anchor(A, B), p2 = anchor(B, A), dx = p2.x - p1.x, dy = p2.y - p1.y, c = Math.max(38, Math.min(115, Math.hypot(dx, dy) * .17)), c1, c2; if (Math.abs(dx) > Math.abs(dy)) { c1 = { x: p1.x + (dx > 0 ? c : -c), y: p1.y }; c2 = { x: p2.x - (dx > 0 ? c : -c), y: p2.y } } else { c1 = { x: p1.x, y: p1.y + (dy > 0 ? c : -c) }; c2 = { x: p2.x, y: p2.y - (dy > 0 ? c : -c) } } return { d: `M ${p1.x} ${p1.y} C ${c1.x} ${c1.y},${c2.x} ${c2.y},${p2.x} ${p2.y}`, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2 } }
+        function renderEdges() { edges.innerHTML = ''; labels.innerHTML = ''; DATA.edges.forEach(ed => { let g = geom(ed), p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', g.d); p.setAttribute('class', 'edge ' + ed.type + (selected && ed.from !== selected && ed.to !== selected ? ' dim' : '')); p.setAttribute('marker-end', 'url(#arr)'); edges.appendChild(p); if (showLabels) { let t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t.setAttribute('x', g.mx); t.setAttribute('y', g.my - 5); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'label'); t.textContent = ed.label; labels.appendChild(t) } }) }
+        function transform() { world.style.transform = `translate(${px}px,${py}px) scale(${scale})` }
+        function select(id) { selected = id; Object.entries(els).forEach(([k, v]) => { let con = k === id || DATA.edges.some(ed => (ed.from === id && ed.to === k) || (ed.to === id && ed.from === k)); v.classList.toggle('sel', k === id); v.classList.toggle('dim', !con) }); renderEdges(); let n = by[id], out = DATA.edges.filter(x => x.from === id), inc = DATA.edges.filter(x => x.to === id); info.innerHTML = `<h3>${esc(n.title)}</h3><div class="small">${esc(n.subtitle)}</div><p class="small">${esc(n.detail || '')}</p>${n.tests ? `<div class="rel"><b>Test functions</b><ol class="testlist">${n.tests.map(t => `<li>${esc(t)}</li>`).join('')}</ol></div>` : ''}${out.map(x => `<div class="rel">→ <b>${esc(by[x.to].title)}</b><br><span class="small">${esc(x.label)} · ${esc(x.type)}</span></div>`).join('')}${inc.map(x => `<div class="rel">← <b>${esc(by[x.from].title)}</b><br><span class="small">${esc(x.label)} · ${esc(x.type)}</span></div>`).join('')}`; info.classList.add('show') }
+        function clear() { selected = null; Object.values(els).forEach(v => v.classList.remove('sel', 'dim')); renderEdges(); info.classList.remove('show') }
+        stage.addEventListener('pointerdown', ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; if (ev.target.closest?.('.node')) return; ev.preventDefault(); clear(); pan = { pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: px, oy: py }; stage.setPointerCapture?.(ev.pointerId); stage.classList.add('pan') })
+        stage.addEventListener('pointermove', ev => { if (drag && drag.pointerId === ev.pointerId) { pos[drag.id].x = drag.ox + (ev.clientX - drag.sx) / scale; pos[drag.id].y = drag.oy + (ev.clientY - drag.sy) / scale; els[drag.id].style.left = pos[drag.id].x + 'px'; els[drag.id].style.top = pos[drag.id].y + 'px'; renderEdges() } else if (pan && pan.pointerId === ev.pointerId) { px = pan.ox + ev.clientX - pan.sx; py = pan.oy + ev.clientY - pan.sy; transform() } })
+        const endPointer = ev => { if (drag && drag.pointerId === ev.pointerId) drag = null; if (pan && pan.pointerId === ev.pointerId) pan = null; stage.classList.remove('pan') }; stage.addEventListener('pointerup', endPointer); stage.addEventListener('pointercancel', endPointer)
+        stage.addEventListener('wheel', ev => { ev.preventDefault(); let r = stage.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, wx = (mx - px) / scale, wy = (my - py) / scale, n = Math.max(.28, Math.min(1.35, scale * (ev.deltaY < 0 ? 1.1 : .9))); px = mx - wx * n; py = my - wy * n; scale = n; transform() }, { passive: false })
+        document.getElementById('search').oninput = ev => { let q = ev.target.value.trim().toLowerCase(); DATA.nodes.forEach(n => { let hay = [n.id, n.title, n.subtitle, n.detail || '', ...(n.meta || []), ...(n.tests || [])].join(' ').toLowerCase(), hit = q && hay.includes(q); els[n.id].classList.toggle('hit', !!hit); if (q) els[n.id].classList.toggle('dim', !hit); else if (!selected) els[n.id].classList.remove('dim') }) }
+        document.getElementById('labelsBtn').onclick = function () { showLabels = !showLabels; this.classList.toggle('on', showLabels); renderEdges() }
+        document.getElementById('fit').onclick = () => { let sw = stage.clientWidth, sh = stage.clientHeight; scale = Math.min(sw / 1810, sh / 1150, .9); px = (sw - 1800 * scale) / 2; py = (sh - 1140 * scale) / 2; transform() }
+        document.getElementById('reset').onclick = () => { Object.keys(pos).forEach(k => Object.assign(pos[k], orig[k])); renderNodes(); renderEdges(); clear(); scale = .70; px = 18; py = 8; transform() }
+        function dl(name, text, type) { let b = new Blob([text], { type }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 300) }
+        document.getElementById('jsonBtn').onclick = () => dl('testing_architecture_graph.json', JSON.stringify(DATA, null, 2), 'application/json')
+        document.getElementById('svgBtn').onclick = () => { let ss = `<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1140" viewBox="0 0 1800 1140"><rect width="100%" height="100%" fill="#fff"/>`; DATA.edges.forEach(ed => { let g = geom(ed), c = ed.type === 'assert' ? '#b65a41' : ed.type === 'fixture' ? '#31836b' : ed.type === 'tool' ? '#4d829c' : ed.type === 'cover' || ed.type === 'indirect' ? '#7958ad' : '#4d74b0'; ss += `<path d="${g.d}" fill="none" stroke="${c}" stroke-width="1.7"${ed.type === 'indirect' ? ' stroke-dasharray="6 5"' : ''}/>` }); DATA.nodes.forEach(n => { let p = pos[n.id]; ss += `<rect x="${p.x}" y="${p.y}" width="${n.w}" height="${n.h}" rx="11" fill="#f7f9fc" stroke="#66758e"/><text x="${p.x + 12}" y="${p.y + 25}" font-size="14" font-weight="700" fill="#172033">${esc(n.title)}</text><text x="${p.x + 12}" y="${p.y + 44}" font-size="10" fill="#5d697c">${esc(n.subtitle)}</text>` }); ss += '</svg>'; dl('testing_architecture_diagram.svg', ss, 'image/svg+xml') }
+        renderGroups(); renderNodes(); renderEdges(); transform();
+    </script>
+</body>
+
+</html>

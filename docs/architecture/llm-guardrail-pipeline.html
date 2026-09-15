@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>LLM Guardrail Pipeline</title>
+    <style>
+        :root {
+            --bg: #08101d;
+            --panel: #121c30;
+            --panel2: #17243d;
+            --border: #2d3d5d;
+            --text: #edf3ff;
+            --muted: #a6b4cf;
+            --blue: #79a7ff;
+            --green: #63d9b2;
+            --gold: #f0c96b;
+            --purple: #c29cff;
+            --red: #ff8b91;
+            --orange: #ffad73;
+            --cyan: #78cce5
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.42 Inter, system-ui, -apple-system, sans-serif
+        }
+
+        button,
+        input {
+            font: inherit
+        }
+
+        .top {
+            height: 74px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 9px 14px;
+            border-bottom: 1px solid var(--border);
+            background: #0b1424;
+            position: relative;
+            z-index: 30
+        }
+
+        .brand {
+            min-width: 330px
+        }
+
+        .brand b {
+            display: block;
+            font-size: 15px
+        }
+
+        .brand span {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .search {
+            width: 225px;
+            background: #0e1728;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 9px;
+            outline: none
+        }
+
+        .btn {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 8px 10px;
+            cursor: pointer
+        }
+
+        .btn:hover {
+            border-color: var(--blue)
+        }
+
+        .btn.on {
+            box-shadow: inset 0 0 0 1px var(--blue)
+        }
+
+        #stage {
+            position: absolute;
+            top: 74px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;
+            user-select: none
+        }
+
+        #stage.pan {
+            cursor: grabbing
+        }
+
+        #world {
+            position: absolute;
+            transform-origin: 0 0
+        }
+
+        svg {
+            position: absolute;
+            inset: 0;
+            overflow: visible;
+            pointer-events: none
+        }
+
+        .group {
+            position: absolute;
+            border: 1px dashed #2b3e5d;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .012);
+            pointer-events: none
+        }
+
+        .glabel {
+            position: absolute;
+            color: #8192ae;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 800;
+            pointer-events: none
+        }
+
+        .node {
+            position: absolute;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: linear-gradient(180deg, var(--panel2), var(--panel));
+            padding: 11px 12px;
+            box-shadow: 0 15px 34px rgba(0, 0, 0, .28);
+            cursor: move;
+            user-select: none;
+            transition: .13s opacity, .13s border-color
+        }
+
+        .node.sel {
+            border-color: white;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, .13), 0 15px 34px rgba(0, 0, 0, .28)
+        }
+
+        .node.dim {
+            opacity: .13
+        }
+
+        .node.hit {
+            border-color: #fff0a0
+        }
+
+        .title {
+            font-size: 14.5px;
+            font-weight: 800
+        }
+
+        .sub {
+            font-size: 10.5px;
+            color: #b8c6df;
+            margin-top: 3px
+        }
+
+        .chips {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-top: 7px
+        }
+
+        .chip {
+            font-size: 9px;
+            color: #aab8d0;
+            border: 1px solid var(--border);
+            padding: 2px 5px;
+            border-radius: 999px
+        }
+
+        .edge {
+            fill: none;
+            stroke-width: 2
+        }
+
+        .label {
+            font-size: 10px;
+            fill: #c7d3e7;
+            paint-order: stroke;
+            stroke: var(--bg);
+            stroke-width: 5px;
+            stroke-linejoin: round
+        }
+
+        .edge.dim {
+            opacity: .06
+        }
+
+        #info {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            width: 410px;
+            max-height: 440px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: rgba(18, 28, 48, .98);
+            box-shadow: 0 15px 36px rgba(0, 0, 0, .35);
+            padding: 13px 14px;
+            z-index: 25;
+            display: none
+        }
+
+        #info.show {
+            display: block
+        }
+
+        #info h3 {
+            margin: 0 0 4px
+        }
+
+        .small {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .rel {
+            padding: 7px 0;
+            border-top: 1px solid var(--border);
+            font-size: 11px
+        }
+
+        #note {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            max-width: 520px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            background: rgba(18, 28, 48, .94);
+            padding: 9px 11px;
+            z-index: 24;
+            color: var(--muted);
+            font-size: 10.5px
+        }
+
+        #note b {
+            color: var(--text)
+        }
+
+        @media(max-width:980px) {
+            .brand {
+                min-width: 205px
+            }
+
+            .brand span {
+                display: none
+            }
+
+            .search {
+                width: 160px
+            }
+
+            #note {
+                max-width: calc(100vw - 28px)
+            }
+
+            #info {
+                width: min(410px, calc(100vw - 28px))
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top">
+        <div class="brand"><b>LLM Guardrail Pipeline</b><span>untrusted model output → deterministic application-owned
+                trust boundary</span></div><input id="search" class="search"
+            placeholder="Search node / detail / edge…"><button class="btn on" id="labelsBtn">Edge labels</button><button
+            class="btn" id="fit">Fit</button><button class="btn" id="reset">Reset</button><button class="btn"
+            id="svgBtn">Download SVG</button><button class="btn" id="jsonBtn">Download JSON</button>
+    </div>
+    <div id="stage">
+        <div id="world">
+            <div id="groups"></div><svg id="svg">
+                <defs>
+                    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                        <path d="M0 0 L8 4 L0 8z" fill="#9cb0d0" />
+                    </marker>
+                </defs>
+                <g id="edges"></g>
+                <g id="labels"></g>
+            </svg>
+            <div id="nodes"></div>
+        </div>
+    </div>
+    <div id="info"></div>
+    <div id="note"></div>
+    <script>
+        const DATA = { "repository": "treeflow-ai/ai-audience-ops", "title": "LLM Guardrail Pipeline", "subtitle": "untrusted model output → deterministic application-owned trust boundary", "canvas": [1700, 940], "nodes": [{ "id": "Text", "title": "User request text", "subtitle": "untrusted natural language", "x": 55, "y": 360, "w": 230, "h": 100, "kind": "input", "detail": "Original text remains the grounding source.", "items": [] }, { "id": "ParserSelect", "title": "get_intent_parser(Settings)", "subtitle": "mock or OpenAI", "x": 350, "y": 360, "w": 250, "h": 100, "kind": "ai", "detail": "Unknown provider fails fast.", "items": [] }, { "id": "Mock", "title": "MockIntentParser", "subtitle": "credential-free deterministic path", "x": 690, "y": 110, "w": 250, "h": 105, "kind": "ai", "detail": "Narrow documented request language; deterministic raw-export detector.", "items": [] }, { "id": "OpenAI", "title": "OpenAIIntentParser", "subtitle": "Responses API Structured Outputs", "x": 690, "y": 300, "w": 250, "h": 120, "kind": "ai", "detail": "timeout=20s, transport retries=1, max_output_tokens=1200; at most 2 application attempts.", "items": [] }, { "id": "Schema", "title": "LLMAudienceIntent", "subtitle": "closed strict provider schema", "x": 1030, "y": 250, "w": 260, "h": 115, "kind": "guard", "detail": "extra=forbid, strict=True, all provider-facing fields required.", "items": [] }, { "id": "Bounds", "title": "Resource bounds", "subtitle": "size + timeout + token + attempts", "x": 1030, "y": 80, "w": 260, "h": 110, "kind": "guard", "detail": "Serialized model object capped at 16,384 bytes; application attempts capped at 2.", "items": [] }, { "id": "Controls", "title": "System-control tamper check", "subtitle": "all mandatory flags must be true", "x": 1030, "y": 420, "w": 260, "h": 110, "kind": "guard", "detail": "Consent/active/suppression/target exclusion cannot be weakened by model.", "items": [] }, { "id": "Ground", "title": "Grounding checks", "subtitle": "token-boundary criteria + time windows", "x": 1360, "y": 70, "w": 270, "h": 115, "kind": "guard", "detail": "Course/profile/manager/time windows must be traceable to source text.", "items": [] }, { "id": "Semantic", "title": "Cross-field semantics", "subtitle": "sensitive consistency", "x": 1360, "y": 245, "w": 270, "h": 110, "kind": "guard", "detail": "raw-export fields agree; target course cannot also be positive selector.", "items": [] }, { "id": "Raw", "title": "Deterministic raw-export backstop", "subtitle": "model may tighten, never downgrade", "x": 1360, "y": 410, "w": 270, "h": 105, "kind": "guard", "detail": "Regex detector OR model classification determines raw export.", "items": [] }, { "id": "Domain", "title": "AudienceIntent domain model", "subtitle": "approved fields copied only", "x": 1030, "y": 610, "w": 260, "h": 105, "kind": "data", "detail": "Application reasserts mandatory controls.", "items": [] }, { "id": "Catalog", "title": "Authoritative DB catalogs", "subtitle": "courses + learner profiles", "x": 1360, "y": 610, "w": 270, "h": 115, "kind": "data", "detail": "Unknown references fail closed; known references canonicalized to stored values.", "items": [] }, { "id": "Policy", "title": "Policy + Query", "subtitle": "deterministic execution begins", "x": 1360, "y": 790, "w": 270, "h": 100, "kind": "success", "detail": "Only after boundary and catalog validation.", "items": [] }, { "id": "Fail", "title": "LLMBoundaryError", "subtitle": "stable fail-closed error", "x": 690, "y": 690, "w": 250, "h": 120, "kind": "failure", "detail": "Provider output is not embedded in errors; OpenAI retries once from original user text before final failure.", "items": [] }], "edges": [{ "from": "Text", "to": "ParserSelect", "label": "parse", "type": "ai" }, { "from": "ParserSelect", "to": "Mock", "label": "LLM_PROVIDER=mock", "type": "ai" }, { "from": "ParserSelect", "to": "OpenAI", "label": "LLM_PROVIDER=openai", "type": "ai" }, { "from": "OpenAI", "to": "Bounds", "label": "provider/client limits", "type": "guard" }, { "from": "OpenAI", "to": "Schema", "label": "responses.parse", "type": "ai" }, { "from": "Schema", "to": "Controls", "label": "validate_llm_intent", "type": "guard" }, { "from": "Controls", "to": "Ground", "label": "pass", "type": "guard" }, { "from": "Ground", "to": "Semantic", "label": "pass", "type": "guard" }, { "from": "Semantic", "to": "Raw", "label": "pass", "type": "guard" }, { "from": "Raw", "to": "Domain", "label": "copy approved fields", "type": "guard" }, { "from": "Mock", "to": "Domain", "label": "deterministic AudienceIntent", "type": "ai" }, { "from": "Domain", "to": "Catalog", "label": "validate_domain_references", "type": "guard" }, { "from": "Catalog", "to": "Policy", "label": "canonical intent", "type": "success" }, { "from": "Schema", "to": "Fail", "label": "validation failure", "type": "failure" }, { "from": "Controls", "to": "Fail", "label": "tampering", "type": "failure" }, { "from": "Ground", "to": "Fail", "label": "ungrounded", "type": "failure" }, { "from": "Semantic", "to": "Fail", "label": "contradiction", "type": "failure" }, { "from": "Catalog", "to": "Fail", "label": "unknown reference", "type": "failure" }, { "from": "Fail", "to": "OpenAI", "label": "one retry when OpenAI boundary attempt remains", "type": "optional" }], "groups": [], "notes": ["Mock parser bypasses provider Structured Outputs but still enters the same downstream deterministic service/policy/query workflow.", "Confidence is descriptive and never grants permission."], "sources": ["app/llm.py", "app/llm_boundary.py", "docs/LLM_BOUNDARY_VALIDATION.md", "README.md"] }; const W = DATA.canvas[0], H = DATA.canvas[1]; const world = document.getElementById('world'), stage = document.getElementById('stage'), svg = document.getElementById('svg'), nodes = document.getElementById('nodes'), edges = document.getElementById('edges'), labels = document.getElementById('labels'), groups = document.getElementById('groups'), info = document.getElementById('info'), note = document.getElementById('note');
+        world.style.width = W + 'px'; world.style.height = H + 'px'; svg.setAttribute('width', W); svg.setAttribute('height', H); svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        const by = Object.fromEntries(DATA.nodes.map(n => [n.id, n])); const pos = Object.fromEntries(DATA.nodes.map(n => [n.id, { x: n.x, y: n.y }])); const orig = JSON.parse(JSON.stringify(pos)); const els = {};
+        let scale = .72, px = 18, py = 8, drag = null, pan = null, selected = null, showLabels = true;
+        const kindColors = { actor: '#79a7ff', input: '#79a7ff', api: '#78cce5', component: '#8798b8', service: '#c29cff', ai: '#c29cff', guard: '#ffad73', policy: '#f0c96b', decision: '#f0c96b', data: '#63d9b2', store: '#63d9b2', external: '#ffad73', success: '#63d9b2', failure: '#ff8b91', gap: '#ff8b91', control: '#78cce5', test: '#c29cff', ci: '#79a7ff', file: '#8798b8', folder: '#79a7ff', state: '#c29cff', risk: '#ff8b91', mitigation: '#63d9b2', partial: '#f0c96b' };
+        const edgeColors = { call: '#8fa4c7', http: '#79a7ff', data: '#63d9b2', read: '#63d9b2', write: '#63d9b2', ai: '#c29cff', guard: '#ffad73', policy: '#f0c96b', success: '#63d9b2', failure: '#ff8b91', optional: '#8798b8', sync: '#ffad73', contains: '#79a7ff', depends: '#c29cff', control: '#78cce5', risk: '#ff8b91', mitigate: '#63d9b2', gap: '#ff8b91' };
+        function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
+        function renderGroups() { groups.innerHTML = ''; for (const g of DATA.groups) { let b = document.createElement('div'); b.className = 'group'; b.style.cssText = `left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px`; groups.appendChild(b); let l = document.createElement('div'); l.className = 'glabel'; l.style.cssText = `left:${g.x + 12}px;top:${g.y + 8}px`; l.textContent = g.label; groups.appendChild(l) } }
+        function renderNodes() { nodes.innerHTML = ''; for (const n of DATA.nodes) { let d = document.createElement('div'); d.className = 'node'; d.dataset.id = n.id; d.style.cssText = `left:${pos[n.id].x}px;top:${pos[n.id].y}px;width:${n.w}px;height:${n.h}px;border-color:${kindColors[n.kind] || '#2d3d5d'}`; d.innerHTML = `<div class="title">${esc(n.title)}</div><div class="sub">${esc(n.subtitle)}</div>${n.items?.length ? `<div class="chips">${n.items.slice(0, 5).map(x => `<span class="chip">${esc(x)}</span>`).join('')}</div>` : ''}`; nodes.appendChild(d); els[n.id] = d; d.onpointerdown = ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; ev.preventDefault(); ev.stopPropagation(); drag = { id: n.id, pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: pos[n.id].x, oy: pos[n.id].y }; d.setPointerCapture?.(ev.pointerId); select(n.id) }; d.onclick = ev => { ev.stopPropagation(); select(n.id) } } }
+        function box(id) { let n = by[id], p = pos[id]; return { x: p.x, y: p.y, w: n.w, h: n.h, cx: p.x + n.w / 2, cy: p.y + n.h / 2 } }
+        function anchor(A, B) { let dx = B.cx - A.cx, dy = B.cy - A.cy; if (Math.abs(dx / A.w) > Math.abs(dy / A.h)) return { x: A.cx + (dx > 0 ? A.w / 2 : -A.w / 2), y: A.cy + dy / (Math.abs(dx) || 1) * A.w / 2 }; return { x: A.cx + dx / (Math.abs(dy) || 1) * A.h / 2, y: A.cy + (dy > 0 ? A.h / 2 : -A.h / 2) } }
+        function geom(ed) { let A = box(ed.from), B = box(ed.to); if (ed.from === ed.to) { return { d: `M ${A.x + A.w - 25} ${A.y + 20} C ${A.x + A.w + 80} ${A.y - 80},${A.x + A.w + 80} ${A.y + 120},${A.x + A.w - 25} ${A.y + 70}`, mx: A.x + A.w + 62, my: A.y - 23 } } let p1 = anchor(A, B), p2 = anchor(B, A), dx = p2.x - p1.x, dy = p2.y - p1.y, c = Math.max(35, Math.min(120, Math.hypot(dx, dy) * .18)), c1, c2; if (Math.abs(dx) > Math.abs(dy)) { c1 = { x: p1.x + (dx > 0 ? c : -c), y: p1.y }; c2 = { x: p2.x - (dx > 0 ? c : -c), y: p2.y } } else { c1 = { x: p1.x, y: p1.y + (dy > 0 ? c : -c) }; c2 = { x: p2.x, y: p2.y - (dy > 0 ? c : -c) } } return { d: `M ${p1.x} ${p1.y} C ${c1.x} ${c1.y},${c2.x} ${c2.y},${p2.x} ${p2.y}`, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2 } }
+        function renderEdges() { edges.innerHTML = ''; labels.innerHTML = ''; for (const ed of DATA.edges) { let g = geom(ed), p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', g.d); p.setAttribute('class', 'edge' + (selected && ed.from !== selected && ed.to !== selected ? ' dim' : '')); p.setAttribute('stroke', edgeColors[ed.type] || '#8fa4c7'); if (ed.type === 'optional' || ed.type === 'gap') p.setAttribute('stroke-dasharray', '7 6'); p.setAttribute('marker-end', 'url(#arr)'); edges.appendChild(p); if (showLabels && ed.label) { let t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t.setAttribute('x', g.mx); t.setAttribute('y', g.my - 5); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'label'); t.textContent = ed.label; labels.appendChild(t) } } }
+        function transform() { world.style.transform = `translate(${px}px,${py}px) scale(${scale})` }
+        function select(id) { selected = id; Object.entries(els).forEach(([k, v]) => { let con = k === id || DATA.edges.some(ed => (ed.from === id && ed.to === k) || (ed.to === id && ed.from === k)); v.classList.toggle('sel', k === id); v.classList.toggle('dim', !con) }); renderEdges(); let n = by[id], out = DATA.edges.filter(x => x.from === id), inc = DATA.edges.filter(x => x.to === id); info.innerHTML = `<h3>${esc(n.title)}</h3><div class="small">${esc(n.subtitle)} · ${esc(n.kind)}</div><p class="small">${esc(n.detail)}</p>${n.items?.length ? `<div class="rel"><b>Key points</b><br>${n.items.map(x => '• ' + esc(x)).join('<br>')}</div>` : ''}${out.map(x => `<div class="rel">→ <b>${esc(by[x.to]?.title || x.to)}</b><br><span class="small">${esc(x.label)} · ${esc(x.type)}</span></div>`).join('')}${inc.map(x => `<div class="rel">← <b>${esc(by[x.from]?.title || x.from)}</b><br><span class="small">${esc(x.label)} · ${esc(x.type)}</span></div>`).join('')}`; info.classList.add('show') }
+        function clear() { selected = null; Object.values(els).forEach(v => v.classList.remove('sel', 'dim')); renderEdges(); info.classList.remove('show') }
+        stage.addEventListener('pointerdown', ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; if (ev.target.closest?.('.node')) return; ev.preventDefault(); clear(); pan = { pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: px, oy: py }; stage.setPointerCapture?.(ev.pointerId); stage.classList.add('pan') })
+        stage.addEventListener('pointermove', ev => { if (drag && drag.pointerId === ev.pointerId) { pos[drag.id].x = drag.ox + (ev.clientX - drag.sx) / scale; pos[drag.id].y = drag.oy + (ev.clientY - drag.sy) / scale; els[drag.id].style.left = pos[drag.id].x + 'px'; els[drag.id].style.top = pos[drag.id].y + 'px'; renderEdges() } else if (pan && pan.pointerId === ev.pointerId) { px = pan.ox + ev.clientX - pan.sx; py = pan.oy + ev.clientY - pan.sy; transform() } })
+        const endPointer = ev => { if (drag && drag.pointerId === ev.pointerId) drag = null; if (pan && pan.pointerId === ev.pointerId) pan = null; stage.classList.remove('pan') }; stage.addEventListener('pointerup', endPointer); stage.addEventListener('pointercancel', endPointer)
+        stage.addEventListener('wheel', ev => { ev.preventDefault(); let r = stage.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, wx = (mx - px) / scale, wy = (my - py) / scale, n = Math.max(.28, Math.min(1.4, scale * (ev.deltaY < 0 ? 1.1 : .9))); px = mx - wx * n; py = my - wy * n; scale = n; transform() }, { passive: false })
+        document.getElementById('search').oninput = ev => { let q = ev.target.value.trim().toLowerCase(); DATA.nodes.forEach(n => { let hay = [n.id, n.title, n.subtitle, n.detail, ...(n.items || [])].join(' ').toLowerCase(), hit = q && hay.includes(q); els[n.id].classList.toggle('hit', !!hit); if (q) els[n.id].classList.toggle('dim', !hit); else if (!selected) els[n.id].classList.remove('dim') }) }
+        document.getElementById('labelsBtn').onclick = function () { showLabels = !showLabels; this.classList.toggle('on', showLabels); renderEdges() }
+        document.getElementById('fit').onclick = () => { let sw = stage.clientWidth, sh = stage.clientHeight; scale = Math.min(sw / (W + 30), sh / (H + 30), .95); px = (sw - W * scale) / 2; py = (sh - H * scale) / 2; transform() }
+        document.getElementById('reset').onclick = () => { Object.keys(pos).forEach(k => Object.assign(pos[k], orig[k])); renderNodes(); renderEdges(); clear(); scale = .72; px = 18; py = 8; transform() }
+        function dl(name, text, type) { let b = new Blob([text], { type }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 300) }
+        document.getElementById('jsonBtn').onclick = () => dl('06_llm_guardrail_pipeline.json', JSON.stringify(DATA, null, 2), 'application/json')
+        document.getElementById('svgBtn').onclick = () => { let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><rect width="100%" height="100%" fill="#fff"/>`; DATA.edges.forEach(ed => { let g = geom(ed); s += `<path d="${g.d}" fill="none" stroke="${edgeColors[ed.type] || '#667'}" stroke-width="2"/>` }); DATA.nodes.forEach(n => { let p = pos[n.id]; s += `<rect x="${p.x}" y="${p.y}" width="${n.w}" height="${n.h}" rx="11" fill="#f8fafc" stroke="${kindColors[n.kind] || '#667'}"/><text x="${p.x + 12}" y="${p.y + 25}" font-size="14" font-weight="700" fill="#172033">${esc(n.title)}</text><text x="${p.x + 12}" y="${p.y + 44}" font-size="10" fill="#5d697c">${esc(n.subtitle)}</text>` }); s += '</svg>'; dl('06_llm_guardrail_pipeline.svg', s, 'image/svg+xml') }
+        note.innerHTML = `<b>Sources:</b> ${DATA.sources.map(esc).join(' · ')}${DATA.notes.length ? '<br><b>Notes:</b> ' + DATA.notes.map(esc).join(' · ') : ''}`;
+        renderGroups(); renderNodes(); renderEdges(); transform();
+    </script>
+</body>
+
+</html>

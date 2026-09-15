@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Implementation-backed interactive architecture portfolio for AI Audience Ops.">
+    <title>AI Audience Ops · Architecture Portfolio</title>
+    <style>
+        :root {
+            --bg: #08101d;
+            --panel: #121c30;
+            --panel2: #17243d;
+            --border: #2d3d5d;
+            --text: #edf3ff;
+            --muted: #a6b4cf;
+            --accent: #79a7ff;
+            --green: #63d9b2
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: radial-gradient(circle at 50% 0, #10223b 0, var(--bg) 42%);
+            color: var(--text);
+            font: 14px/1.5 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+        }
+
+        a {
+            color: inherit
+        }
+
+        .hero {
+            padding: 44px 30px 30px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(11, 20, 36, .88)
+        }
+
+        .hero-inner {
+            max-width: 1240px;
+            margin: 0 auto
+        }
+
+        .eyebrow {
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--accent)
+        }
+
+        h1 {
+            margin: 8px 0 10px;
+            font-size: clamp(30px, 4vw, 48px);
+            line-height: 1.08
+        }
+
+        .lead {
+            max-width: 860px;
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px
+        }
+
+        .meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 18px
+        }
+
+        .pill {
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 5px 9px;
+            font-size: 11px;
+            color: #c7d3e8;
+            background: rgba(23, 36, 61, .65)
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--panel2);
+            border-radius: 10px;
+            padding: 9px 12px;
+            font-weight: 700
+        }
+
+        .btn:hover {
+            border-color: var(--accent)
+        }
+
+        .btn.primary {
+            border-color: #426ba9;
+            background: #17335d
+        }
+
+        .note {
+            max-width: 1240px;
+            margin: 20px auto 0;
+            padding: 0 30px;
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .note b {
+            color: var(--text)
+        }
+
+        main {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 22px 30px 54px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 16px
+        }
+
+        .card {
+            text-decoration: none;
+            color: var(--text);
+            background: linear-gradient(180deg, var(--panel2), var(--panel));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform .15s, border-color .15s, box-shadow .15s
+        }
+
+        .card:hover {
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 18px 42px rgba(0, 0, 0, .28)
+        }
+
+        img {
+            width: 100%;
+            aspect-ratio: 16/10;
+            object-fit: contain;
+            background: #08101d;
+            display: block;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .copy {
+            padding: 14px 15px 16px
+        }
+
+        .copy b {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 15px
+        }
+
+        .copy span {
+            color: var(--muted);
+            font-size: 12px
+        }
+
+        .tag {
+            display: inline-block;
+            margin-top: 9px;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: .8px
+        }
+
+        footer {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 30px 34px;
+            color: #7f90ac;
+            font-size: 11px
+        }
+
+        @media(max-width:600px) {
+            .hero {
+                padding: 34px 20px 24px
+            }
+
+            .note,
+            main,
+            footer {
+                padding-left: 20px;
+                padding-right: 20px
+            }
+
+            main {
+                grid-template-columns: 1fr
+            }
+
+            .actions {
+                flex-direction: column
+            }
+
+            .btn {
+                justify-content: center
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="eyebrow">Engineering Portfolio · Interactive Documentation</div>
+            <h1>AI Audience Ops · Architecture Portfolio</h1>
+            <p class="lead">Implementation-backed views of a governed AI audience orchestration demo: LLM boundary
+                validation, deterministic policy controls, human approval, durable synchronization, persistence, and
+                test coverage.</p>
+            <div class="actions"><a class="btn primary" href="architecture-overview.html">Open Architecture
+                    Overview</a><a class="btn" href="https://github.com/treeflow-ai/ai-audience-ops" target="_blank"
+                    rel="noreferrer">View Repository ↗</a></div>
+        </div>
+    </section>
+    <div class="note"><b>Interaction:</b> drag any diagram background to pan, use the mouse wheel or trackpad to zoom,
+        drag
+        cards/nodes where supported, and use Fit to restore a useful overview.</div>
+    <main>
+        <a class="card" href="architecture-overview.html"><img src="architecture-overview.svg"
+                alt="Architecture Overview">
+            <div class="copy"><b>Architecture Overview</b><span>System components, trust boundaries, data flow,
+                    persistence, and external integrations.</span>
+                <div class="tag">System view</div>
+            </div>
+        </a>
+        <a class="card" href="request-lifecycle.html"><img src="request-lifecycle.svg" alt="Request Lifecycle Sequence">
+            <div class="copy"><b>Request Lifecycle Sequence</b><span>Natural-language request → governed audience →
+                    approval → durable synchronization.</span>
+                <div class="tag">Runtime flow</div>
+            </div>
+        </a>
+        <a class="card" href="workflow-state-machine.html"><img src="workflow-state-machine.svg"
+                alt="WorkflowState State Machine">
+            <div class="copy"><b>WorkflowState State Machine</b><span>Public workflow states, legal transitions, and
+                    SyncJob / SyncBatch execution internals.</span>
+                <div class="tag">State model</div>
+            </div>
+        </a>
+        <a class="card" href="database-erd.html"><img src="database-erd.svg" alt="SQLAlchemy ER Diagram">
+            <div class="copy"><b>SQLAlchemy ER Diagram</b><span>ORM tables, fields, foreign keys, constraints, and
+                    relationships.</span>
+                <div class="tag">Persistence</div>
+            </div>
+        </a>
+        <a class="card" href="llm-guardrail-pipeline.html"><img src="llm-guardrail-pipeline.svg"
+                alt="LLM Guardrail Pipeline">
+            <div class="copy"><b>LLM Guardrail Pipeline</b><span>How untrusted model output passes strict schema,
+                    grounding, and catalog validation before deterministic execution.</span>
+                <div class="tag">AI safety boundary</div>
+            </div>
+        </a>
+        <a class="card" href="durable-sync-sequence.html"><img src="durable-sync-sequence.svg"
+                alt="Durable Sync Sequence">
+            <div class="copy"><b>Durable Sync Sequence</b><span>Idempotency, batching, leases, retries, checkpoints, and
+                    failure recovery.</span>
+                <div class="tag">Reliability</div>
+            </div>
+        </a>
+        <a class="card" href="testing-architecture.html"><img src="testing-architecture.svg"
+                alt="Testing Architecture and Coverage">
+            <div class="copy"><b>Testing Architecture / Coverage</b><span>pytest structure, fixtures and fakes, CI
+                    runners, security invariants, and production-code coverage.</span>
+                <div class="tag">Verification</div>
+            </div>
+        </a>
+    </main>
+    <footer>AI Audience Ops </footer>
+</body>
+
+</html>

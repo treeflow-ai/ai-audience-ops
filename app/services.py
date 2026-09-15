@@ -166,9 +166,11 @@ class AudienceService:
             self.session.commit()
             return self.get_request(request_id)
 
+        # workflow state guard
         if not request.status.can_sync:
             raise ValueError(f"Request cannot be synced from status={request.status.value}.")
 
+        # create/resume durable SyncJob + idempotency key
         member_ids = self._member_ids(request_id)
         fingerprint = self._audience_fingerprint(member_ids)
         job = self._ensure_sync_job(request, member_ids, fingerprint)
