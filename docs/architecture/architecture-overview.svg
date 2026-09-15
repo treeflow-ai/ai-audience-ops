@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1755" height="1055" viewBox="0 0 1755 1055">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#9fb1cf"/></marker></defs>
+<rect width="100%" height="100%" fill="#08101d"/>
+<text x="28" y="35" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="21" font-weight="700">Architecture Overview</text>
+<path d="M 285.0 222.5 C 322.5 222.5, 322.5 305.0, 360.0 305.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="322.5" y="258.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">HTTP forms / pages</text>
+<path d="M 285.0 374.0 C 322.5 374.0, 322.5 305.0, 360.0 305.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="322.5" y="334.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">REST JSON</text>
+<path d="M 485.0 250.0 C 485.0 250.0, 485.0 170.0, 485.0 170.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="485.0" y="205.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">renders</text>
+<path d="M 610.0 305.0 C 650.0 305.0, 650.0 127.5, 690.0 127.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="650.0" y="211.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">validates payloads</text>
+<path d="M 610.0 305.0 C 650.0 305.0, 650.0 330.0, 690.0 330.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="650.0" y="312.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">delegates</text>
+<path d="M 960.0 330.0 C 1000.0 330.0, 1000.0 97.5, 1040.0 97.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="208.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">parse(text)</text>
+<path d="M 1310.0 97.5 C 1372.5 97.5, 1372.5 85.0, 1435.0 85.0" fill="none" stroke="#8295b5" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1372.5" y="86.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">optional Responses API</text>
+<path d="M 1175.0 150.0 C 1175.0 150.0, 1175.0 190.0, 1175.0 190.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1175.0" y="165.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">provider output validation</text>
+<path d="M 960.0 330.0 C 1000.0 330.0, 1000.0 245.0, 1040.0 245.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="282.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">validate domain refs</text>
+<path d="M 1040.0 245.0 C 995.0 245.0, 995.0 127.5, 950.0 127.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="995.0" y="181.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">AudienceIntent / CourseRule</text>
+<path d="M 960.0 330.0 C 1000.0 330.0, 1000.0 407.5, 1040.0 407.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="363.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">retrieve context</text>
+<path d="M 1310.0 407.5 C 1372.5 407.5, 1372.5 380.0, 1435.0 380.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1372.5" y="388.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">read Markdown</text>
+<path d="M 960.0 330.0 C 1000.0 330.0, 1000.0 562.5, 1040.0 562.5" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="441.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">pre_query / post_query</text>
+<path d="M 825.0 390.0 C 1000.0 390.0, 1000.0 665.0, 1175.0 665.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="522.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">evaluate governed audience</text>
+<path d="M 825.0 390.0 C 825.0 390.0, 825.0 475.0, 825.0 475.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="825.0" y="427.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">state transitions</text>
+<path d="M 1040.0 720.0 C 1000.0 720.0, 1000.0 737.5, 960.0 737.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="723.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">SQLAlchemy queries</text>
+<path d="M 825.0 390.0 C 825.0 390.0, 825.0 685.0, 825.0 685.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="825.0" y="532.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">requests · audit · members · jobs</text>
+<path d="M 825.0 790.0 C 825.0 790.0, 825.0 845.0, 825.0 845.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="825.0" y="812.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">persist / load</text>
+<path d="M 610.0 865.0 C 650.0 865.0, 650.0 895.0, 690.0 895.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="650.0" y="875.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">startup seed</text>
+<path d="M 485.0 360.0 C 485.0 360.0, 485.0 815.0, 485.0 815.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="485.0" y="582.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">lifespan startup</text>
+<path d="M 825.0 390.0 C 1000.0 390.0, 1000.0 825.0, 1175.0 825.0" fill="none" stroke="#ffad73" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="602.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">POST /sync</text>
+<path d="M 1040.0 880.0 C 1000.0 880.0, 1000.0 737.5, 960.0 737.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1000.0" y="803.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">SyncJob / SyncBatch checkpoints</text>
+<path d="M 1310.0 880.0 C 1372.5 880.0, 1372.5 787.5, 1435.0 787.5" fill="none" stroke="#ffad73" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1372.5" y="828.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">sync_batch(governed recipients)</text>
+<path d="M 1567.5 845.0 C 1567.5 845.0, 1567.5 900.0, 1567.5 900.0" fill="none" stroke="#8295b5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1567.5" y="867.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">side effects</text>
+<path d="M 1435.0 612.5 C 1372.5 612.5, 1372.5 720.0, 1310.0 720.0" fill="none" stroke="#8295b5" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1372.5" y="661.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">deployment data-source option</text>
+<rect x="50.0" y="175.0" width="235.0" height="95.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="62.0" y="200.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Browser / Marketing User</text>
+<text x="62.0" y="218.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">HTML dashboard + forms</text>
+<rect x="50.0" y="330.0" width="235.0" height="88.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="62.0" y="355.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">API Client</text>
+<text x="62.0" y="373.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">REST / OpenAPI</text>
+<rect x="360.0" y="250.0" width="250.0" height="110.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="372.0" y="275.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/main.py</text>
+<text x="372.0" y="293.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">FastAPI · Jinja2 · routing</text>
+<rect x="360.0" y="80.0" width="250.0" height="90.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="372.0" y="105.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">templates/ + static/</text>
+<text x="372.0" y="123.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">server-rendered UI</text>
+<rect x="690.0" y="80.0" width="260.0" height="95.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="702.0" y="105.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/schemas.py</text>
+<text x="702.0" y="123.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">Pydantic request/domain schemas</text>
+<rect x="690.0" y="270.0" width="270.0" height="120.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="702.0" y="295.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">AudienceService</text>
+<text x="702.0" y="313.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/services.py · orchestration</text>
+<rect x="700.0" y="475.0" width="250.0" height="95.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="712.0" y="500.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">WorkflowState</text>
+<text x="712.0" y="518.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/workflow.py</text>
+<rect x="1040.0" y="45.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1052.0" y="70.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Intent Parser</text>
+<text x="1052.0" y="88.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/llm.py · mock / OpenAI</text>
+<rect x="1040.0" y="190.0" width="270.0" height="110.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1052.0" y="215.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">LLM Boundary</text>
+<text x="1052.0" y="233.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/llm_boundary.py</text>
+<rect x="1435.0" y="40.0" width="265.0" height="90.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1447.0" y="65.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">OpenAI Responses API</text>
+<text x="1447.0" y="83.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">optional external provider</text>
+<rect x="1040.0" y="355.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1052.0" y="380.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">PolicyRetriever</text>
+<text x="1052.0" y="398.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/retrieval.py</text>
+<rect x="1040.0" y="510.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1052.0" y="535.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">PolicyEngine</text>
+<text x="1052.0" y="553.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/policy.py</text>
+<rect x="1040.0" y="665.0" width="270.0" height="110.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1052.0" y="690.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">AudienceQueryEngine</text>
+<text x="1052.0" y="708.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/query_engine.py</text>
+<rect x="1435.0" y="335.0" width="265.0" height="90.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1447.0" y="360.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">policies/*.md</text>
+<text x="1447.0" y="378.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">local policy corpus</text>
+<rect x="690.0" y="685.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="702.0" y="710.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">SQLAlchemy ORM</text>
+<text x="702.0" y="728.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/models.py</text>
+<rect x="690.0" y="845.0" width="270.0" height="100.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="702.0" y="870.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">SQLite</text>
+<text x="702.0" y="888.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/db.py · var/audience_ops.db</text>
+<rect x="360.0" y="815.0" width="250.0" height="100.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="372.0" y="840.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Synthetic Seed</text>
+<text x="372.0" y="858.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/seed.py · 12,000 learners default</text>
+<rect x="1040.0" y="825.0" width="270.0" height="110.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1052.0" y="850.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Durable Sync Coordinator</text>
+<text x="1052.0" y="868.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">AudienceService.sync()</text>
+<rect x="1435.0" y="730.0" width="265.0" height="115.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1447.0" y="755.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Marketing Adapters</text>
+<text x="1447.0" y="773.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/adapters/marketing.py</text>
+<rect x="1435.0" y="900.0" width="265.0" height="100.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1447.0" y="925.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Marketing Providers</text>
+<text x="1447.0" y="943.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">mock log · Mailchimp · Constant Contact</text>
+<rect x="1435.0" y="560.0" width="265.0" height="105.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="1447.0" y="585.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">LearnDashClient</text>
+<text x="1447.0" y="603.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app/adapters/learndash.py · optional</text>
+</svg>

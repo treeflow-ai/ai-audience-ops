@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1574" viewBox="0 0 1400 1574">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#9fb1cf"/></marker></defs><rect width="100%" height="100%" fill="#08101d"/>
+<text x="28" y="34" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="21" font-weight="700">Durable Sync Sequence</text>
+<rect x="8.0" y="55" width="164" height="58" rx="10" fill="#121c30" stroke="#566987"/>
+<text x="90.0" y="79" text-anchor="middle" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="11.5" font-weight="700">Caller</text>
+<text x="90.0" y="97" text-anchor="middle" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="8.8">POST /sync</text>
+<line x1="90.0" y1="113" x2="90.0" y2="1539" stroke="#52627e" stroke-dasharray="5 6"/>
+<rect x="313.0" y="55" width="164" height="58" rx="10" fill="#121c30" stroke="#566987"/>
+<text x="395.0" y="79" text-anchor="middle" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="11.5" font-weight="700">AudienceService</text>
+<text x="395.0" y="97" text-anchor="middle" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="8.8">sync coordinator</text>
+<line x1="395.0" y1="113" x2="395.0" y2="1539" stroke="#52627e" stroke-dasharray="5 6"/>
+<rect x="618.0" y="55" width="164" height="58" rx="10" fill="#121c30" stroke="#566987"/>
+<text x="700.0" y="79" text-anchor="middle" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="11.5" font-weight="700">SQLite / ORM</text>
+<text x="700.0" y="97" text-anchor="middle" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="8.8">SyncJob + SyncBatch</text>
+<line x1="700.0" y1="113" x2="700.0" y2="1539" stroke="#52627e" stroke-dasharray="5 6"/>
+<rect x="923.0" y="55" width="164" height="58" rx="10" fill="#121c30" stroke="#566987"/>
+<text x="1005.0" y="79" text-anchor="middle" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="11.5" font-weight="700">MarketingAdapter</text>
+<text x="1005.0" y="97" text-anchor="middle" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="8.8">sync_batch()</text>
+<line x1="1005.0" y1="113" x2="1005.0" y2="1539" stroke="#52627e" stroke-dasharray="5 6"/>
+<rect x="1228.0" y="55" width="164" height="58" rx="10" fill="#121c30" stroke="#566987"/>
+<text x="1310.0" y="79" text-anchor="middle" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="11.5" font-weight="700">Provider</text>
+<text x="1310.0" y="97" text-anchor="middle" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="8.8">mock / Mailchimp / CC</text>
+<line x1="1310.0" y1="113" x2="1310.0" y2="1539" stroke="#52627e" stroke-dasharray="5 6"/>
+<line x1="90.0" y1="143" x2="395.0" y2="143" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="242.5" y="136" text-anchor="middle" fill="#79a7ff" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">POST /api/requests/{id}/sync</text>
+<line x1="395.0" y1="195" x2="700.0" y2="195" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="188" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">load request + governed AudienceMember ids</text>
+<line x1="395.0" y1="247" x2="395.0" y2="247" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="395.0" y="240" text-anchor="middle" fill="#f0c96b" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">derive audience fingerprint + job idempotency key</text>
+<line x1="395.0" y1="299" x2="700.0" y2="299" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="292" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">get-or-create one SyncJob + deterministic batches</text>
+<line x1="395.0" y1="351" x2="700.0" y2="351" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="344" text-anchor="middle" fill="#f0c96b" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">atomic acquire job lease</text>
+<line x1="395.0" y1="403" x2="700.0" y2="403" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="396" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">if FAILED recovery: reset failed batches only</text>
+<line x1="395.0" y1="455" x2="395.0" y2="455" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="395.0" y="448" text-anchor="middle" fill="#f0c96b" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">verify snapshot + real-sync cap/enablement preflight</text>
+<line x1="395.0" y1="507" x2="700.0" y2="507" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="500" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">job RUNNING + audit SYNC_STARTED/RESUMED</text>
+<line x1="395.0" y1="559" x2="700.0" y2="559" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="552" text-anchor="middle" fill="#f0c96b" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">claim next PENDING/RETRY_PENDING/expired IN_PROGRESS batch</text>
+<line x1="395.0" y1="611" x2="1005.0" y2="611" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="700.0" y="604" text-anchor="middle" fill="#79a7ff" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">sync_batch(... same batch idempotency key ...)</text>
+<line x1="1005.0" y1="663" x2="1310.0" y2="663" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1157.5" y="656" text-anchor="middle" fill="#79a7ff" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">provider call / mock log</text>
+<line x1="1310.0" y1="715" x2="1005.0" y2="715" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="1157.5" y="708" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">operation/list id accepted</text>
+<line x1="1005.0" y1="767" x2="395.0" y2="767" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="700.0" y="760" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">checkpoint_operation(operation_id, segment_id)</text>
+<line x1="395.0" y1="819" x2="700.0" y2="819" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="812" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">commit downstream operation checkpoint</text>
+<line x1="1005.0" y1="871" x2="395.0" y2="871" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="700.0" y="864" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">success → SyncResult</text>
+<line x1="395.0" y1="923" x2="700.0" y2="923" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="916" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">batch SUCCEEDED + synced_count + audit</text>
+<line x1="1005.0" y1="975" x2="395.0" y2="975" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="700.0" y="968" text-anchor="middle" fill="#ff8b91" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">retryable failure (408/409/425/429/5xx/network/CC timeout)</text>
+<line x1="395.0" y1="1027" x2="700.0" y2="1027" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="1020" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">RETRY_PENDING + next_attempt_at + attempt counters</text>
+<line x1="395.0" y1="1079" x2="395.0" y2="1079" stroke="#f0c96b" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="395.0" y="1072" text-anchor="middle" fill="#f0c96b" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">bounded exponential backoff</text>
+<line x1="395.0" y1="1131" x2="1005.0" y2="1131" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="700.0" y="1124" text-anchor="middle" fill="#79a7ff" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">retry same batch identity</text>
+<line x1="1005.0" y1="1183" x2="395.0" y2="1183" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="700.0" y="1176" text-anchor="middle" fill="#ff8b91" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">permanent / unknown error</text>
+<line x1="395.0" y1="1235" x2="700.0" y2="1235" stroke="#ff8b91" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="1228" text-anchor="middle" fill="#ff8b91" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">batch/job FAILED; request → SYNC_FAILED</text>
+<line x1="90.0" y1="1287" x2="395.0" y2="1287" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="242.5" y="1280" text-anchor="middle" fill="#79a7ff" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">manual POST /sync again</text>
+<line x1="395.0" y1="1339" x2="700.0" y2="1339" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="1332" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">same SyncJob; preserve SUCCEEDED batches</text>
+<line x1="395.0" y1="1391" x2="700.0" y2="1391" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="1384" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">all batches SUCCEEDED → job SUCCEEDED</text>
+<line x1="395.0" y1="1443" x2="700.0" y2="1443" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="547.5" y="1436" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">request → SYNCED + release lease</text>
+<line x1="395.0" y1="1495" x2="90.0" y2="1495" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="242.5" y="1488" text-anchor="middle" fill="#63d9b2" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">return durable sync state; repeat-after-success is no-o…</text>
+</svg>

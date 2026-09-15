@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ai-audience-ops · Architecture Diagram</title>
+    <style>
+        :root {
+            --bg: #08101d;
+            --panel: #121b2d;
+            --panel2: #17243c;
+            --border: #2d3d5d;
+            --text: #edf3ff;
+            --muted: #a6b4ce;
+            --http: #75a7ff;
+            --ai: #c29cff;
+            --gov: #f0c96b;
+            --data: #65d0b0;
+            --sync: #ff9a70;
+            --optional: #8d9bb7
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.42 Inter, system-ui, sans-serif
+        }
+
+        input,
+        button {
+            font: inherit
+        }
+
+        .top {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border);
+            background: #0b1424;
+            z-index: 30;
+            position: relative
+        }
+
+        .brand {
+            min-width: 320px
+        }
+
+        .brand b {
+            display: block
+        }
+
+        .brand span {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .search {
+            width: 230px;
+            background: #0e1728;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 9px;
+            outline: none
+        }
+
+        .btn {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 9px;
+            padding: 8px 10px;
+            cursor: pointer
+        }
+
+        .btn:hover {
+            border-color: var(--http)
+        }
+
+        .btn.on {
+            box-shadow: inset 0 0 0 1px var(--http)
+        }
+
+        #stage {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 76px;
+            bottom: 0;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;
+            user-select: none
+        }
+
+        #stage.pan {
+            cursor: grabbing
+        }
+
+        #world {
+            position: absolute;
+            width: 1780px;
+            height: 1080px;
+            transform-origin: 0 0
+        }
+
+        svg {
+            position: absolute;
+            inset: 0;
+            width: 1780px;
+            height: 1080px;
+            pointer-events: none;
+            overflow: visible
+        }
+
+        .groupBox {
+            position: absolute;
+            border: 1px dashed #283955;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, .012);
+            pointer-events: none
+        }
+
+        .groupLabel {
+            position: absolute;
+            color: #8090ac;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-weight: 700;
+            pointer-events: none
+        }
+
+        .node {
+            position: absolute;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: linear-gradient(180deg, var(--panel2), var(--panel));
+            padding: 12px;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, .3);
+            cursor: move;
+            user-select: none;
+            transition: opacity .14s, border-color .14s
+        }
+
+        .node.sel {
+            border-color: var(--http);
+            box-shadow: 0 0 0 2px rgba(117, 167, 255, .2), 0 16px 36px rgba(0, 0, 0, .3)
+        }
+
+        .node.dim {
+            opacity: .16
+        }
+
+        .node.hit {
+            border-color: #fff0a6
+        }
+
+        .title {
+            font-weight: 800;
+            font-size: 14.5px
+        }
+
+        .sub {
+            font-size: 10.5px;
+            color: #b5c4de;
+            margin-top: 3px
+        }
+
+        .groupChip {
+            font-size: 9px;
+            color: #91a2bf;
+            border: 1px solid var(--border);
+            padding: 2px 5px;
+            border-radius: 999px;
+            display: inline-block;
+            margin-top: 8px
+        }
+
+        .edge {
+            fill: none;
+            stroke-width: 2
+        }
+
+        .edge.http {
+            stroke: var(--http)
+        }
+
+        .edge.render,
+        .edge.call {
+            stroke: #91a6ca
+        }
+
+        .edge.ai {
+            stroke: var(--ai)
+        }
+
+        .edge.govern {
+            stroke: var(--gov)
+        }
+
+        .edge.data,
+        .edge.read {
+            stroke: var(--data)
+        }
+
+        .edge.sync,
+        .edge.external {
+            stroke: var(--sync)
+        }
+
+        .edge.optional {
+            stroke: var(--optional);
+            stroke-dasharray: 7 6
+        }
+
+        .edge.dim {
+            opacity: .08
+        }
+
+        .label {
+            font-size: 10.5px;
+            fill: #c8d3e7;
+            paint-order: stroke;
+            stroke: var(--bg);
+            stroke-width: 5px;
+            stroke-linejoin: round
+        }
+
+        #info {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            width: 390px;
+            max-height: 390px;
+            overflow: auto;
+            border: 1px solid var(--border);
+            border-radius: 13px;
+            background: rgba(18, 27, 45, .97);
+            box-shadow: 0 16px 38px rgba(0, 0, 0, .32);
+            padding: 13px 14px;
+            z-index: 25;
+            display: none
+        }
+
+        #info.show {
+            display: block
+        }
+
+        #info h3 {
+            margin: 0 0 4px
+        }
+
+        .small {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .rel {
+            padding: 7px 0;
+            border-top: 1px solid var(--border);
+            font-size: 11px
+        }
+
+        #trust {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            width: 430px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(18, 27, 45, .94);
+            padding: 10px 12px;
+            z-index: 24;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        #trust b {
+            color: var(--text)
+        }
+
+        .legend {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 10px;
+            display: flex;
+            gap: 8px
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px
+        }
+
+        .dai {
+            background: var(--ai)
+        }
+
+        .dgov {
+            background: var(--gov)
+        }
+
+        .ddata {
+            background: var(--data)
+        }
+
+        .dsync {
+            background: var(--sync)
+        }
+
+        @media(max-width:1050px) {
+            .legend {
+                display: none
+            }
+
+            .brand {
+                min-width: 210px
+            }
+
+            .brand span {
+                display: none
+            }
+
+            .search {
+                width: 170px
+            }
+
+            #trust {
+                width: min(430px, calc(100vw - 28px))
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top">
+        <div class="brand"><b>AI Audience Ops · Architecture Diagram</b><span>whole-project runtime architecture</span></div>
+        <input class="search" id="search" placeholder="Search module / layer / dependency…"><button class="btn on"
+            id="optional">Optional integrations</button><button class="btn" id="fit">Fit</button><button class="btn"
+            id="reset">Reset</button><button class="btn" id="svgBtn">Download SVG</button><button class="btn"
+            id="jsonBtn">Download JSON</button>
+        <div class="legend"><span><i class="dot dai"></i>AI boundary</span><span><i
+                    class="dot dgov"></i>governance</span><span><i class="dot ddata"></i>data</span><span><i
+                    class="dot dsync"></i>sync/external</span></div>
+    </div>
+    <div id="stage">
+        <div id="world">
+            <div id="groups"></div><svg viewBox="0 0 1780 1080">
+                <defs>
+                    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                        <path d="M0 0 L8 4 L0 8z" fill="#9cb0d0" />
+                    </marker>
+                </defs>
+                <g id="edges"></g>
+                <g id="labels"></g>
+            </svg>
+            <div id="nodes"></div>
+        </div>
+    </div>
+    <div id="info"></div>
+    <div id="trust"><b>Core trust boundary:</b> The LLM / intent parser interprets natural language only. Pydantic and
+        the LLM boundary validate model output first; policy enforcement, row-level filtering, approval, WorkflowState
+        transitions, and marketing side effects remain application-owned. Policy retrieval provides explanatory context
+        and never authorizes access.</div>
+    <script>
+        const DATA = { "repository": "treeflow-ai/ai-audience-ops", "branch": "main", "generated_on": "2026-09-11", "sources": ["README.md", "ARCHITECTURE.md", "app/main.py", "app/services.py", "app/llm.py", "app/llm_boundary.py", "app/policy.py", "app/query_engine.py", "app/retrieval.py", "app/models.py", "app/db.py", "app/seed.py", "app/workflow.py", "app/adapters/marketing.py", "app/adapters/learndash.py"], "nodes": [{ "id": "Browser", "title": "Browser / Marketing User", "subtitle": "HTML dashboard + forms", "group": "Experience", "x": 50, "y": 175, "w": 235, "h": 95, "detail": "Human marketing user submits natural-language requests, reviews aggregate-only results, approves/syncs when allowed." }, { "id": "APIClient", "title": "API Client", "subtitle": "REST / OpenAPI", "group": "Experience", "x": 50, "y": 330, "w": 235, "h": 88, "detail": "Programmatic clients use /api/requests, approve, sync, and sync-status endpoints." }, { "id": "FastAPI", "title": "app/main.py", "subtitle": "FastAPI · Jinja2 · routing", "group": "Application", "x": 360, "y": 250, "w": 250, "h": 110, "detail": "HTTP/UI entry point. Creates SQLAlchemy sessions and delegates business behavior to AudienceService." }, { "id": "Templates", "title": "templates/ + static/", "subtitle": "server-rendered UI", "group": "Experience", "x": 360, "y": 80, "w": 250, "h": 90, "detail": "Dashboard and detail UI; review surface is aggregate-only." }, { "id": "Schemas", "title": "app/schemas.py", "subtitle": "Pydantic request/domain schemas", "group": "Application", "x": 690, "y": 80, "w": 260, "h": 95, "detail": "Validates API payloads and constrained audience intent/domain result shapes." }, { "id": "Service", "title": "AudienceService", "subtitle": "app/services.py · orchestration", "group": "Application", "x": 690, "y": 270, "w": 270, "h": 120, "detail": "Central coordinator for create → validate → retrieve → policy → query → approve → durable sync, audit and persistence." }, { "id": "Workflow", "title": "WorkflowState", "subtitle": "app/workflow.py", "group": "Governance", "x": 700, "y": 475, "w": 250, "h": 95, "detail": "Public request state machine: EVALUATING, BLOCKED, REVIEW_REQUIRED, READY_TO_SYNC, APPROVED, SYNCED, SYNC_FAILED." }, { "id": "IntentParser", "title": "Intent Parser", "subtitle": "app/llm.py · mock / OpenAI", "group": "AI boundary", "x": 1040, "y": 45, "w": 270, "h": 105, "detail": "Converts natural language into AudienceIntent. Default is deterministic mock; optional OpenAI Responses API." }, { "id": "LLMBoundary", "title": "LLM Boundary", "subtitle": "app/llm_boundary.py", "group": "AI boundary", "x": 1040, "y": 190, "w": 270, "h": 110, "detail": "Treats model output as untrusted: strict provider schema, size/attempt limits, domain-reference validation, application-owned constraints." }, { "id": "OpenAI", "title": "OpenAI Responses API", "subtitle": "optional external provider", "group": "External", "x": 1435, "y": 40, "w": 265, "h": 90, "detail": "Optional model provider for intent interpretation only. No DB credentials or downstream execution authority." }, { "id": "Retriever", "title": "PolicyRetriever", "subtitle": "app/retrieval.py", "group": "Governance", "x": 1040, "y": 355, "w": 270, "h": 105, "detail": "Lexical retrieval over Markdown policy sections for explanatory context; retrieval does not authorize access." }, { "id": "PolicyEngine", "title": "PolicyEngine", "subtitle": "app/policy.py", "group": "Governance", "x": 1040, "y": 510, "w": 270, "h": 105, "detail": "Deterministic pre/post-query decisions: raw-export block, target-course rule, approval threshold, manager requirement." }, { "id": "QueryEngine", "title": "AudienceQueryEngine", "subtitle": "app/query_engine.py", "group": "Data / governance", "x": 1040, "y": 665, "w": 270, "h": 110, "detail": "Deterministic SQLAlchemy filtering over students/enrollments, enforcing consent/account/suppression/target-course filters and producing funnel steps." }, { "id": "PolicyFiles", "title": "policies/*.md", "subtitle": "local policy corpus", "group": "Data", "x": 1435, "y": 335, "w": 265, "h": 90, "detail": "Markdown policy source used by PolicyRetriever for transparent contextual retrieval." }, { "id": "ORM", "title": "SQLAlchemy ORM", "subtitle": "app/models.py", "group": "Persistence", "x": 690, "y": 685, "w": 270, "h": 105, "detail": "AudienceRequest, AuditEvent, AudienceMember, Student, Course, Enrollment, SyncJob, SyncBatch persistence model." }, { "id": "DB", "title": "SQLite", "subtitle": "app/db.py · var/audience_ops.db", "group": "Persistence", "x": 690, "y": 845, "w": 270, "h": 100, "detail": "Default durable local database. Stores governed audience state, audit history, memberships and sync checkpoints." }, { "id": "Seed", "title": "Synthetic Seed", "subtitle": "app/seed.py · 12,000 learners default", "group": "Data", "x": 360, "y": 815, "w": 250, "h": 100, "detail": "Deterministic demo learner/course/enrollment/consent/suppression dataset, loaded at application startup." }, { "id": "SyncCoordinator", "title": "Durable Sync Coordinator", "subtitle": "AudienceService.sync()", "group": "Integration", "x": 1040, "y": 825, "w": 270, "h": 110, "detail": "Creates/reuses one SyncJob, fingerprints the audience, batches recipients, acquires leases, checkpoints progress, retries transient failures and resumes failed jobs." }, { "id": "MarketingAdapter", "title": "Marketing Adapters", "subtitle": "app/adapters/marketing.py", "group": "Integration", "x": 1435, "y": 730, "w": 265, "h": 115, "detail": "Adapter boundary for mock providers, Mailchimp and Constant Contact. Receives only governed recipients after policy/approval gates." }, { "id": "Providers", "title": "Marketing Providers", "subtitle": "mock log · Mailchimp · Constant Contact", "group": "External", "x": 1435, "y": 900, "w": 265, "h": 100, "detail": "Mock adapters by default; guarded real providers are disabled by default and capped by REAL_SYNC_MAX_RECIPIENTS." }, { "id": "LearnDash", "title": "LearnDashClient", "subtitle": "app/adapters/learndash.py · optional", "group": "External", "x": 1435, "y": 560, "w": 265, "h": 105, "detail": "Thin optional adapter for documented LearnDash REST course-user/user-course endpoints. The runnable demo uses seeded SQLite data." }], "edges": [{ "from": "Browser", "to": "FastAPI", "label": "HTTP forms / pages", "type": "http" }, { "from": "APIClient", "to": "FastAPI", "label": "REST JSON", "type": "http" }, { "from": "FastAPI", "to": "Templates", "label": "renders", "type": "render" }, { "from": "FastAPI", "to": "Schemas", "label": "validates payloads", "type": "call" }, { "from": "FastAPI", "to": "Service", "label": "delegates", "type": "call" }, { "from": "Service", "to": "IntentParser", "label": "parse(text)", "type": "ai" }, { "from": "IntentParser", "to": "OpenAI", "label": "optional Responses API", "type": "optional" }, { "from": "IntentParser", "to": "LLMBoundary", "label": "provider output validation", "type": "ai" }, { "from": "Service", "to": "LLMBoundary", "label": "validate domain refs", "type": "ai" }, { "from": "LLMBoundary", "to": "Schemas", "label": "AudienceIntent / CourseRule", "type": "call" }, { "from": "Service", "to": "Retriever", "label": "retrieve context", "type": "call" }, { "from": "Retriever", "to": "PolicyFiles", "label": "read Markdown", "type": "read" }, { "from": "Service", "to": "PolicyEngine", "label": "pre_query / post_query", "type": "govern" }, { "from": "Service", "to": "QueryEngine", "label": "evaluate governed audience", "type": "govern" }, { "from": "Service", "to": "Workflow", "label": "state transitions", "type": "govern" }, { "from": "QueryEngine", "to": "ORM", "label": "SQLAlchemy queries", "type": "data" }, { "from": "Service", "to": "ORM", "label": "requests · audit · members · jobs", "type": "data" }, { "from": "ORM", "to": "DB", "label": "persist / load", "type": "data" }, { "from": "Seed", "to": "DB", "label": "startup seed", "type": "data" }, { "from": "FastAPI", "to": "Seed", "label": "lifespan startup", "type": "call" }, { "from": "Service", "to": "SyncCoordinator", "label": "POST /sync", "type": "sync" }, { "from": "SyncCoordinator", "to": "ORM", "label": "SyncJob / SyncBatch checkpoints", "type": "data" }, { "from": "SyncCoordinator", "to": "MarketingAdapter", "label": "sync_batch(governed recipients)", "type": "sync" }, { "from": "MarketingAdapter", "to": "Providers", "label": "side effects", "type": "external" }, { "from": "LearnDash", "to": "QueryEngine", "label": "deployment data-source option", "type": "optional" }], "notes": ["AI interpretation is outside the authorization/execution boundary.", "Policy enforcement, row filtering, approval, state transitions and downstream side effects are application-owned deterministic code.", "Policy retrieval is explanatory, not executable authorization.", "The default public demo is credential-free: mock intent parser, local policy retrieval, seeded SQLite and mock marketing adapters.", "Durable synchronization runs synchronously inside the HTTP request today, but SyncJob/SyncBatch persistence is worker-ready.", "LearnDash and real marketing providers are optional adapters; real marketing sync is disabled by default."] }; const by = Object.fromEntries(DATA.nodes.map(n => [n.id, n])); const pos = Object.fromEntries(DATA.nodes.map(n => [n.id, { x: n.x, y: n.y }])); const orig = JSON.parse(JSON.stringify(pos)); const els = {};
+        let scale = .72, px = 20, py = 8, drag = null, pan = null, selected = null, showOptional = true;
+        const stage = document.getElementById('stage'), world = document.getElementById('world'), nodes = document.getElementById('nodes'), edges = document.getElementById('edges'), labels = document.getElementById('labels'), groups = document.getElementById('groups'), info = document.getElementById('info');
+        function e(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
+        const groupRects = [
+            { label: 'Experience / HTTP', x: 25, y: 35, w: 610, h: 415 }, { label: 'Application orchestration', x: 650, y: 35, w: 325, h: 575 }, { label: 'AI interpretation boundary', x: 1000, y: 20, w: 335, h: 305 },
+            { label: 'Deterministic governance & data access', x: 1000, y: 330, w: 335, h: 470 }, { label: 'Persistence / demo data', x: 325, y: 650, w: 655, h: 335 }, { label: 'External & integration boundary', x: 1385, y: 20, w: 350, h: 1010 }];
+        function renderGroups() { groups.innerHTML = ''; groupRects.forEach(g => { let b = document.createElement('div'); b.className = 'groupBox'; b.style.cssText = `left:${g.x}px;top:${g.y}px;width:${g.w}px;height:${g.h}px`; groups.appendChild(b); let l = document.createElement('div'); l.className = 'groupLabel'; l.style.cssText = `left:${g.x + 14}px;top:${g.y + 9}px`; l.textContent = g.label; groups.appendChild(l) }) }
+        function renderNodes() { nodes.innerHTML = ''; DATA.nodes.forEach(n => { let d = document.createElement('div'); d.className = 'node'; d.dataset.id = n.id; d.style.cssText = `left:${pos[n.id].x}px;top:${pos[n.id].y}px;width:${n.w}px;height:${n.h}px`; d.innerHTML = `<div class="title">${e(n.title)}</div><div class="sub">${e(n.subtitle)}</div><span class="groupChip">${e(n.group)}</span>`; nodes.appendChild(d); els[n.id] = d; d.onpointerdown = ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; ev.preventDefault(); ev.stopPropagation(); drag = { id: n.id, pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: pos[n.id].x, oy: pos[n.id].y }; d.setPointerCapture?.(ev.pointerId); select(n.id) }; d.onclick = ev => { ev.stopPropagation(); select(n.id) } }) }
+        function box(id) { let n = by[id], p = pos[id]; return { x: p.x, y: p.y, w: n.w, h: n.h, cx: p.x + n.w / 2, cy: p.y + n.h / 2 } }
+        function anchor(A, B) { let dx = B.cx - A.cx, dy = B.cy - A.cy; if (Math.abs(dx / A.w) > Math.abs(dy / A.h)) return { x: A.cx + (dx > 0 ? A.w / 2 : -A.w / 2), y: A.cy + dy / (Math.abs(dx) || 1) * A.w / 2 }; return { x: A.cx + dx / (Math.abs(dy) || 1) * A.h / 2, y: A.cy + (dy > 0 ? A.h / 2 : -A.h / 2) } }
+        function geom(ed) { let A = box(ed.from), B = box(ed.to), p1 = anchor(A, B), p2 = anchor(B, A), dx = p2.x - p1.x, dy = p2.y - p1.y, c = Math.max(40, Math.min(120, Math.hypot(dx, dy) * .18)), c1, c2; if (Math.abs(dx) > Math.abs(dy)) { c1 = { x: p1.x + (dx > 0 ? c : -c), y: p1.y }; c2 = { x: p2.x - (dx > 0 ? c : -c), y: p2.y } } else { c1 = { x: p1.x, y: p1.y + (dy > 0 ? c : -c) }; c2 = { x: p2.x, y: p2.y - (dy > 0 ? c : -c) } } return { d: `M ${p1.x} ${p1.y} C ${c1.x} ${c1.y},${c2.x} ${c2.y},${p2.x} ${p2.y}`, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2 } }
+        function edgeVisible(ed) { return showOptional || ed.type !== 'optional' }
+        function renderEdges() { edges.innerHTML = ''; labels.innerHTML = ''; DATA.edges.filter(edgeVisible).forEach(ed => { let g = geom(ed), p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', g.d); p.setAttribute('class', 'edge ' + ed.type + (selected && ed.from !== selected && ed.to !== selected ? ' dim' : '')); p.setAttribute('marker-end', 'url(#arr)'); edges.appendChild(p); let t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t.setAttribute('x', g.mx); t.setAttribute('y', g.my - 5); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'label'); t.textContent = ed.label; labels.appendChild(t) }) }
+        function transform() { world.style.transform = `translate(${px}px,${py}px) scale(${scale})` }
+        function select(id) { selected = id; Object.entries(els).forEach(([k, v]) => { let con = k === id || DATA.edges.some(ed => (ed.from === id && ed.to === k) || (ed.to === id && ed.from === k)); v.classList.toggle('sel', k === id); v.classList.toggle('dim', !con) }); renderEdges(); let n = by[id], out = DATA.edges.filter(x => x.from === id), inc = DATA.edges.filter(x => x.to === id); info.innerHTML = `<h3>${e(n.title)}</h3><div class="small">${e(n.subtitle)} · ${e(n.group)}</div><p class="small">${e(n.detail)}</p>${out.map(x => `<div class="rel">→ <b>${e(by[x.to].title)}</b><br><span class="small">${e(x.label)} · ${e(x.type)}</span></div>`).join('')}${inc.map(x => `<div class="rel">← <b>${e(by[x.from].title)}</b><br><span class="small">${e(x.label)} · ${e(x.type)}</span></div>`).join('')}`; info.classList.add('show') }
+        function clear() { selected = null; Object.values(els).forEach(v => v.classList.remove('sel', 'dim')); renderEdges(); info.classList.remove('show') }
+        stage.addEventListener('pointerdown', ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; if (ev.target.closest?.('.node')) return; ev.preventDefault(); clear(); pan = { pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: px, oy: py }; stage.setPointerCapture?.(ev.pointerId); stage.classList.add('pan') }); stage.addEventListener('pointermove', ev => { if (drag && drag.pointerId === ev.pointerId) { pos[drag.id].x = drag.ox + (ev.clientX - drag.sx) / scale; pos[drag.id].y = drag.oy + (ev.clientY - drag.sy) / scale; els[drag.id].style.left = pos[drag.id].x + 'px'; els[drag.id].style.top = pos[drag.id].y + 'px'; renderEdges() } else if (pan && pan.pointerId === ev.pointerId) { px = pan.ox + ev.clientX - pan.sx; py = pan.oy + ev.clientY - pan.sy; transform() } }); const endPointer = ev => { if (drag && drag.pointerId === ev.pointerId) drag = null; if (pan && pan.pointerId === ev.pointerId) pan = null; stage.classList.remove('pan') }; stage.addEventListener('pointerup', endPointer); stage.addEventListener('pointercancel', endPointer)
+        stage.addEventListener('wheel', ev => { ev.preventDefault(); let r = stage.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, wx = (mx - px) / scale, wy = (my - py) / scale, n = Math.max(.3, Math.min(1.35, scale * (ev.deltaY < 0 ? 1.1 : .9))); px = mx - wx * n; py = my - wy * n; scale = n; transform() }, { passive: false })
+        document.getElementById('search').oninput = ev => { let q = ev.target.value.trim().toLowerCase(); DATA.nodes.forEach(n => { let hay = [n.id, n.title, n.subtitle, n.group, n.detail].join(' ').toLowerCase(), hit = q && hay.includes(q); els[n.id].classList.toggle('hit', !!hit); if (q) els[n.id].classList.toggle('dim', !hit); else if (!selected) els[n.id].classList.remove('dim') }) }
+        document.getElementById('optional').onclick = function () { showOptional = !showOptional; this.classList.toggle('on', showOptional); renderEdges();['OpenAI', 'LearnDash'].forEach(id => els[id].style.opacity = showOptional ? '1' : '.2') }
+        document.getElementById('fit').onclick = () => { let sw = stage.clientWidth, sh = stage.clientHeight; scale = Math.min(sw / 1790, sh / 1090, .9); px = (sw - 1780 * scale) / 2; py = (sh - 1080 * scale) / 2; transform() }
+        document.getElementById('reset').onclick = () => { Object.keys(pos).forEach(k => Object.assign(pos[k], orig[k])); renderNodes(); renderEdges(); clear(); scale = .72; px = 20; py = 8; transform() }
+        function dl(name, text, type) { let b = new Blob([text], { type }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 300) }
+        document.getElementById('jsonBtn').onclick = () => dl('architecture_graph.json', JSON.stringify(DATA, null, 2), 'application/json')
+        document.getElementById('svgBtn').onclick = () => { let ss = `<svg xmlns="http://www.w3.org/2000/svg" width="1780" height="1080" viewBox="0 0 1780 1080"><rect width="100%" height="100%" fill="#fff"/>`; DATA.edges.filter(edgeVisible).forEach(ed => { let g = geom(ed), c = ed.type === 'ai' ? '#7856b6' : ed.type === 'govern' ? '#9b781a' : (['data', 'read'].includes(ed.type) ? '#237e68' : (['sync', 'external'].includes(ed.type) ? '#b85c39' : '#55739e')); ss += `<path d="${g.d}" fill="none" stroke="${c}" stroke-width="2"${ed.type === 'optional' ? ' stroke-dasharray="7 6"' : ''}/><text x="${g.mx}" y="${g.my - 5}" text-anchor="middle" font-size="10" fill="#333">${e(ed.label)}</text>` }); DATA.nodes.forEach(n => { let p = pos[n.id]; ss += `<rect x="${p.x}" y="${p.y}" width="${n.w}" height="${n.h}" rx="11" fill="#f7f9fc" stroke="#66758e"/><text x="${p.x + 12}" y="${p.y + 25}" font-size="14" font-weight="700" fill="#172033">${e(n.title)}</text><text x="${p.x + 12}" y="${p.y + 44}" font-size="10" fill="#5d697c">${e(n.subtitle)}</text>` }); ss += '</svg>'; dl('architecture_diagram.svg', ss, 'image/svg+xml') }
+        renderGroups(); renderNodes(); renderEdges(); transform();
+    </script>
+</body>
+
+</html>

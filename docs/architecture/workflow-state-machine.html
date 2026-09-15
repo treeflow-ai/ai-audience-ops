@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>ai-audience-ops · WorkflowState State Machine</title>
+    <style>
+        :root {
+            --bg: #09101d;
+            --panel: #121c30;
+            --panel2: #17243d;
+            --border: #2b3b5c;
+            --text: #eef4ff;
+            --muted: #a6b4cf;
+            --legal: #79a7ff;
+            --success: #63d9b2;
+            --fail: #ff8b91;
+            --init: #c3a6ff;
+            --internal: #f0c96b
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font: 14px/1.4 Inter, system-ui, sans-serif
+        }
+
+        button {
+            font: inherit
+        }
+
+        .top {
+            height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            background: #0c1424;
+            position: relative;
+            z-index: 20
+        }
+
+        .brand {
+            min-width: 330px
+        }
+
+        .brand b {
+            display: block
+        }
+
+        .brand span {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        .btn {
+            background: var(--panel2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 8px 10px;
+            border-radius: 9px;
+            cursor: pointer
+        }
+
+        .btn:hover {
+            border-color: var(--legal)
+        }
+
+        .btn.on {
+            box-shadow: inset 0 0 0 1px var(--legal)
+        }
+
+        .legend {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 11px;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .sw {
+            display: inline-block;
+            width: 14px;
+            height: 3px;
+            vertical-align: middle;
+            margin-right: 5px
+        }
+
+        .legal {
+            background: var(--legal)
+        }
+
+        .success {
+            background: var(--success)
+        }
+
+        .failure {
+            background: var(--fail)
+        }
+
+        .internal {
+            background: var(--internal)
+        }
+
+        #stage {
+            position: absolute;
+            top: 72px;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            overflow: hidden;
+            cursor: grab;
+            touch-action: none;
+            user-select: none
+        }
+
+        #stage.pan {
+            cursor: grabbing
+        }
+
+        #world {
+            position: absolute;
+            width: 1800px;
+            height: 980px;
+            transform-origin: 0 0
+        }
+
+        svg {
+            position: absolute;
+            inset: 0;
+            width: 1800px;
+            height: 980px;
+            overflow: visible;
+            pointer-events: none
+        }
+
+        .edge {
+            fill: none;
+            stroke-width: 2.2
+        }
+
+        .edge.legal {
+            stroke: var(--legal)
+        }
+
+        .edge.success {
+            stroke: var(--success)
+        }
+
+        .edge.failure {
+            stroke: var(--fail)
+        }
+
+        .edge.init,
+        .edge.init_block {
+            stroke: var(--init);
+            stroke-dasharray: 6 5
+        }
+
+        .edge.internal,
+        .edge.internal_success,
+        .edge.internal_failure {
+            stroke: var(--internal);
+            stroke-dasharray: 8 6;
+            opacity: .8
+        }
+
+        .edge.internal_success {
+            stroke: var(--success)
+        }
+
+        .edge.internal_failure {
+            stroke: var(--fail)
+        }
+
+        .edge-label {
+            font-size: 11px;
+            fill: #d8e1f1;
+            paint-order: stroke;
+            stroke: var(--bg);
+            stroke-width: 5px;
+            stroke-linejoin: round
+        }
+
+        .node {
+            position: absolute;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: linear-gradient(180deg, var(--panel2), var(--panel));
+            box-shadow: 0 18px 38px rgba(0, 0, 0, .3);
+            padding: 13px;
+            cursor: move;
+            user-select: none
+        }
+
+        .node.terminal {
+            border-color: #517464
+        }
+
+        .node.failed {
+            border-color: #804b56
+        }
+
+        .node.review {
+            border-color: #796a45
+        }
+
+        .node.internal {
+            border-style: dashed;
+            border-color: #806d3d
+        }
+
+        .node.pseudo {
+            border-style: dashed
+        }
+
+        .node.sel {
+            box-shadow: 0 0 0 2px rgba(121, 167, 255, .25), 0 18px 38px rgba(0, 0, 0, .3);
+            border-color: var(--legal)
+        }
+
+        .title {
+            font-weight: 800;
+            font-size: 15px
+        }
+
+        .desc {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 7px
+        }
+
+        .flags {
+            margin-top: 8px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap
+        }
+
+        .chip {
+            font-size: 9.5px;
+            border: 1px solid var(--border);
+            padding: 2px 5px;
+            border-radius: 999px;
+            color: #cbd6ec
+        }
+
+        #note {
+            position: absolute;
+            right: 14px;
+            bottom: 14px;
+            width: 410px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(18, 28, 48, .97);
+            padding: 12px 14px;
+            z-index: 22;
+            box-shadow: 0 16px 35px rgba(0, 0, 0, .32)
+        }
+
+        #note b {
+            font-size: 13px
+        }
+
+        #note p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        #info {
+            position: absolute;
+            left: 14px;
+            bottom: 14px;
+            width: 360px;
+            max-height: 280px;
+            overflow: auto;
+            background: rgba(18, 28, 48, .97);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            z-index: 23;
+            display: none
+        }
+
+        #info.show {
+            display: block
+        }
+
+        #info h3 {
+            margin: 0 0 7px;
+            font-size: 15px
+        }
+
+        #info p {
+            font-size: 11px;
+            color: var(--muted)
+        }
+
+        @media(max-width:950px) {
+            .legend {
+                display: none
+            }
+
+            .brand {
+                min-width: 230px
+            }
+
+            .brand span {
+                display: none
+            }
+
+            #note {
+                width: min(410px, calc(100vw - 28px))
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top">
+        <div class="brand"><b>WorkflowState · State Machine Diagram</b><span>
+                workflow.py + services.py</span></div>
+        <button class="btn on" id="legalBtn">Public transitions</button><button class="btn on" id="internalBtn">Sync
+            internals</button>
+        <button class="btn" id="fit">Fit</button><button class="btn" id="reset">Reset</button><button class="btn"
+            id="svgBtn">Download SVG</button><button class="btn" id="jsonBtn">Download JSON</button>
+        <div class="legend"><span><i class="sw legal"></i>legal transition</span><span><i
+                    class="sw success"></i>success</span><span><i class="sw failure"></i>failure/retry</span><span><i
+                    class="sw internal"></i>durable sync internal</span></div>
+    </div>
+    <div id="stage">
+        <div id="world"><svg viewBox="0 0 1800 980">
+                <defs>
+                    <marker id="aBlue" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                        <path d="M0 0 L9 4.5 L0 9z" fill="#79a7ff" />
+                    </marker>
+                    <marker id="aGreen" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                        <path d="M0 0 L9 4.5 L0 9z" fill="#63d9b2" />
+                    </marker>
+                    <marker id="aRed" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                        <path d="M0 0 L9 4.5 L0 9z" fill="#ff8b91" />
+                    </marker>
+                    <marker id="aPurple" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                        <path d="M0 0 L9 4.5 L0 9z" fill="#c3a6ff" />
+                    </marker>
+                    <marker id="aGold" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto">
+                        <path d="M0 0 L9 4.5 L0 9z" fill="#f0c96b" />
+                    </marker>
+                </defs>
+                <g id="edges"></g>
+                <g id="labels"></g>
+            </svg>
+            <div id="nodes"></div>
+        </div>
+    </div>
+    <div id="info"></div>
+    <div id="note"><b>Why is there no SYNCING state?</b>
+        <p>This is an intentional public API contract in the source. While execution is in progress, the request remains
+            READY_TO_SYNC / APPROVED (or SYNC_FAILED during recovery); the actual PENDING / RUNNING / retry /
+            batch-checkpoint state is persisted by SyncJob and SyncBatch.</p>
+    </div>
+    <script>
+        const DATA = { "repository": "treeflow-ai/ai-audience-ops", "branch": "main", "source": ["app/workflow.py", "app/services.py", "ARCHITECTURE.md"], "generated_on": "2026-09-11", "nodes": [{ "id": "START", "label": "● Start", "x": 80, "y": 300, "w": 150, "h": 76, "kind": "pseudo", "detail": "A new audience request enters the governed workflow." }, { "id": "EVALUATING", "label": "EVALUATING", "x": 330, "y": 300, "w": 220, "h": 105, "kind": "active", "detail": "Intent passed pre-query checks; deterministic audience evaluation/post-query policy is running.", "flags": ["initial public working state"] }, { "id": "BLOCKED", "label": "BLOCKED", "x": 700, "y": 70, "w": 220, "h": 105, "kind": "terminal", "detail": "Policy refused the request. No governed audience is released.", "flags": ["terminal", "cannot sync"] }, { "id": "REVIEW_REQUIRED", "label": "REVIEW_REQUIRED", "x": 700, "y": 255, "w": 240, "h": 115, "kind": "review", "detail": "Audience exceeds approval threshold and an identified manager must approve.", "flags": ["requires_approval = true", "cannot sync"] }, { "id": "READY_TO_SYNC", "label": "READY_TO_SYNC", "x": 700, "y": 470, "w": 240, "h": 115, "kind": "ready", "detail": "Deterministic checks passed and no manager review is required.", "flags": ["can_sync = true"] }, { "id": "APPROVED", "label": "APPROVED", "x": 1080, "y": 255, "w": 220, "h": 105, "kind": "ready", "detail": "The identified manager approved the governed audience.", "flags": ["can_sync = true"] }, { "id": "SYNC_FAILED", "label": "SYNC_FAILED", "x": 1080, "y": 490, "w": 220, "h": 115, "kind": "failed", "detail": "Durable synchronization reached a terminal failure for this round. Manual POST /sync may resume the same logical job.", "flags": ["can_sync = true", "retryable public state"] }, { "id": "SYNCED", "label": "SYNCED", "x": 1450, "y": 355, "w": 220, "h": 115, "kind": "terminal", "detail": "All durable batches succeeded (or a previously successful job was reconciled).", "flags": ["terminal", "successful release"] }, { "id": "SYNC_JOB", "label": "SyncJob / SyncBatch", "x": 1065, "y": 720, "w": 270, "h": 130, "kind": "internal", "detail": "In-flight execution is represented here, not by a public SYNCING state. Job/batch statuses include PENDING, RUNNING/IN_PROGRESS, RETRY_PENDING, FAILED, SUCCEEDED.", "flags": ["durable checkpoints", "leases + retry metadata", "not a WorkflowState"] }], "edges": [{ "from": "START", "to": "EVALUATING", "label": "create_request · pre-query passes", "type": "init" }, { "from": "START", "to": "BLOCKED", "label": "create_request · pre-query BLOCK", "type": "init_block" }, { "from": "EVALUATING", "to": "BLOCKED", "label": "post-query BLOCK", "type": "legal" }, { "from": "EVALUATING", "to": "REVIEW_REQUIRED", "label": "post-query REVIEW", "type": "legal" }, { "from": "EVALUATING", "to": "READY_TO_SYNC", "label": "all deterministic checks pass", "type": "legal" }, { "from": "REVIEW_REQUIRED", "to": "APPROVED", "label": "approve() · approver == manager", "type": "legal" }, { "from": "READY_TO_SYNC", "to": "SYNCED", "label": "all batches SUCCEEDED", "type": "success" }, { "from": "READY_TO_SYNC", "to": "SYNC_FAILED", "label": "terminal sync failure", "type": "failure" }, { "from": "APPROVED", "to": "SYNCED", "label": "all batches SUCCEEDED", "type": "success" }, { "from": "APPROVED", "to": "SYNC_FAILED", "label": "terminal sync failure", "type": "failure" }, { "from": "SYNC_FAILED", "to": "SYNCED", "label": "manual retry/resume succeeds", "type": "success" }, { "from": "SYNC_FAILED", "to": "SYNC_FAILED", "label": "retry round fails again", "type": "failure" }, { "from": "READY_TO_SYNC", "to": "SYNC_JOB", "label": "POST /sync", "type": "internal" }, { "from": "APPROVED", "to": "SYNC_JOB", "label": "POST /sync", "type": "internal" }, { "from": "SYNC_FAILED", "to": "SYNC_JOB", "label": "POST /sync · resume same job", "type": "internal" }, { "from": "SYNC_JOB", "to": "SYNCED", "label": "job SUCCEEDED", "type": "internal_success" }, { "from": "SYNC_JOB", "to": "SYNC_FAILED", "label": "job FAILED", "type": "internal_failure" }], "notes": ["Formal WorkflowState.transition_to() has 10 legal state-to-state transitions.", "START edges are runtime initialization paths, not WorkflowState.transition_to() transitions.", "No public SYNCING state: in-flight work lives in durable SyncJob / SyncBatch records.", "SYNC_FAILED is intentionally can_sync=true so POST /sync can resume the same logical job."] }; const pos = Object.fromEntries(DATA.nodes.map(n => [n.id, { x: n.x, y: n.y }])); const orig = JSON.parse(JSON.stringify(pos));
+        const by = Object.fromEntries(DATA.nodes.map(n => [n.id, n])); const els = {}; let scale = .78, px = 35, py = 12, drag = null, pan = null, showPublic = true, showInternal = true;
+        const stage = document.getElementById('stage'), world = document.getElementById('world'), edges = document.getElementById('edges'), labels = document.getElementById('labels'), nodes = document.getElementById('nodes'), info = document.getElementById('info');
+        function e(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) }
+        function renderNodes() { nodes.innerHTML = ''; DATA.nodes.forEach(n => { let d = document.createElement('div'); d.className = 'node ' + n.kind; d.dataset.id = n.id; d.style.cssText = `left:${pos[n.id].x}px;top:${pos[n.id].y}px;width:${n.w}px;height:${n.h}px`; d.innerHTML = `<div class="title">${e(n.label)}</div><div class="desc">${e(n.detail)}</div>${n.flags ? `<div class="flags">${n.flags.map(x => `<span class="chip">${e(x)}</span>`).join('')}</div>` : ''}`; nodes.appendChild(d); els[n.id] = d; d.onpointerdown = ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; ev.preventDefault(); ev.stopPropagation(); drag = { id: n.id, pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: pos[n.id].x, oy: pos[n.id].y }; d.setPointerCapture?.(ev.pointerId); select(n.id) }; d.onclick = ev => { ev.stopPropagation(); select(n.id) } }) }
+        function box(id) { let n = by[id], p = pos[id]; return { x: p.x, y: p.y, w: n.w, h: n.h, cx: p.x + n.w / 2, cy: p.y + n.h / 2 } }
+        function anchors(A, B) { let dx = B.cx - A.cx, dy = B.cy - A.cy; if (Math.abs(dx / A.w) > Math.abs(dy / A.h)) return [{ x: A.cx + (dx > 0 ? A.w / 2 : -A.w / 2), y: A.cy + dy / (Math.abs(dx) || 1) * A.w / 2 }, { x: B.cx - (dx > 0 ? B.w / 2 : -B.w / 2), y: B.cy - dy / (Math.abs(dx) || 1) * B.w / 2 }]; return [{ x: A.cx + dx / (Math.abs(dy) || 1) * A.h / 2, y: A.cy + (dy > 0 ? A.h / 2 : -A.h / 2) }, { x: B.cx - dx / (Math.abs(dy) || 1) * B.h / 2, y: B.cy - (dy > 0 ? B.h / 2 : -B.h / 2) }] }
+        function geom(ed) { let A = box(ed.from), B = box(ed.to); if (ed.from === ed.to) { let x = A.x + A.w, y = A.y + 18; return { d: `M ${x - 4} ${y} C ${x + 95} ${y - 95}, ${x + 125} ${y + 95}, ${x - 4} ${y + 54}`, mx: x + 90, my: y - 53 } } let [p1, p2] = anchors(A, B), dx = p2.x - p1.x, dy = p2.y - p1.y, c = Math.max(45, Math.min(130, Math.hypot(dx, dy) * .2)), c1, c2; if (Math.abs(dx) > Math.abs(dy)) { c1 = { x: p1.x + (dx > 0 ? c : -c), y: p1.y }; c2 = { x: p2.x - (dx > 0 ? c : -c), y: p2.y } } else { c1 = { x: p1.x, y: p1.y + (dy > 0 ? c : -c) }; c2 = { x: p2.x, y: p2.y - (dy > 0 ? c : -c) } } return { d: `M ${p1.x} ${p1.y} C ${c1.x} ${c1.y},${c2.x} ${c2.y},${p2.x} ${p2.y}`, mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2 } }
+        function marker(t) { if (t.includes('failure')) return 'aRed'; if (t.includes('success')) return 'aGreen'; if (t.startsWith('init')) return 'aPurple'; if (t.startsWith('internal')) return 'aGold'; return 'aBlue' }
+        function visible(ed) { let intr = ed.type.startsWith('internal'); return intr ? showInternal : showPublic }
+        function renderEdges() { edges.innerHTML = ''; labels.innerHTML = ''; DATA.edges.filter(visible).forEach(ed => { let g = geom(ed), p = document.createElementNS('http://www.w3.org/2000/svg', 'path'); p.setAttribute('d', g.d); p.setAttribute('class', 'edge ' + ed.type); p.setAttribute('marker-end', `url(#${marker(ed.type)})`); edges.appendChild(p); let t = document.createElementNS('http://www.w3.org/2000/svg', 'text'); t.setAttribute('x', g.mx); t.setAttribute('y', g.my - 6); t.setAttribute('text-anchor', 'middle'); t.setAttribute('class', 'edge-label'); t.textContent = ed.label; labels.appendChild(t) }) }
+        function transform() { world.style.transform = `translate(${px}px,${py}px) scale(${scale})` }
+        function select(id) { Object.values(els).forEach(x => x.classList.remove('sel')); els[id].classList.add('sel'); let n = by[id], out = DATA.edges.filter(x => x.from === id), inc = DATA.edges.filter(x => x.to === id); info.innerHTML = `<h3>${e(n.label)}</h3><p>${e(n.detail)}</p><p><b>Outgoing</b><br>${out.length ? out.map(x => `${e(x.label)} → ${e(x.to)}`).join('<br>') : '—'}</p><p><b>Incoming</b><br>${inc.length ? inc.map(x => `${e(x.from)} → ${e(x.label)}`).join('<br>') : '—'}</p>`; info.classList.add('show') }
+        stage.addEventListener('pointerdown', ev => { if (ev.pointerType === 'mouse' && ev.button !== 0) return; if (ev.target.closest?.('.node')) return; ev.preventDefault(); pan = { pointerId: ev.pointerId, sx: ev.clientX, sy: ev.clientY, ox: px, oy: py }; stage.setPointerCapture?.(ev.pointerId); stage.classList.add('pan') }); stage.addEventListener('pointermove', ev => { if (drag && drag.pointerId === ev.pointerId) { pos[drag.id].x = drag.ox + (ev.clientX - drag.sx) / scale; pos[drag.id].y = drag.oy + (ev.clientY - drag.sy) / scale; els[drag.id].style.left = pos[drag.id].x + 'px'; els[drag.id].style.top = pos[drag.id].y + 'px'; renderEdges() } else if (pan && pan.pointerId === ev.pointerId) { px = pan.ox + ev.clientX - pan.sx; py = pan.oy + ev.clientY - pan.sy; transform() } }); const endPointer = ev => { if (drag && drag.pointerId === ev.pointerId) drag = null; if (pan && pan.pointerId === ev.pointerId) pan = null; stage.classList.remove('pan') }; stage.addEventListener('pointerup', endPointer); stage.addEventListener('pointercancel', endPointer)
+        stage.addEventListener('wheel', ev => { ev.preventDefault(); let r = stage.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top, wx = (mx - px) / scale, wy = (my - py) / scale, n = Math.max(.35, Math.min(1.4, scale * (ev.deltaY < 0 ? 1.1 : .9))); px = mx - wx * n; py = my - wy * n; scale = n; transform() }, { passive: false })
+        document.getElementById('legalBtn').onclick = function () { showPublic = !showPublic; this.classList.toggle('on', showPublic); renderEdges() }; document.getElementById('internalBtn').onclick = function () { showInternal = !showInternal; this.classList.toggle('on', showInternal); renderEdges() }
+        document.getElementById('fit').onclick = () => { let sw = stage.clientWidth, sh = stage.clientHeight; scale = Math.min(sw / 1810, sh / 990, .95); px = (sw - 1800 * scale) / 2; py = (sh - 980 * scale) / 2; transform() }
+        document.getElementById('reset').onclick = () => { Object.keys(pos).forEach(k => Object.assign(pos[k], orig[k])); renderNodes(); renderEdges(); scale = .78; px = 35; py = 12; transform() }
+        function dl(name, text, type) { let b = new Blob([text], { type }), a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 300) }
+        document.getElementById('jsonBtn').onclick = () => dl('workflow_state_machine.json', JSON.stringify(DATA, null, 2), 'application/json');
+        document.getElementById('svgBtn').onclick = () => { let ss = `<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="980" viewBox="0 0 1800 980"><rect width="100%" height="100%" fill="#fff"/>`; DATA.edges.filter(visible).forEach(ed => { let g = geom(ed), c = ed.type.includes('failure') ? '#c94855' : ed.type.includes('success') ? '#23866a' : ed.type.startsWith('init') ? '#7955b7' : ed.type.startsWith('internal') ? '#94751e' : '#416fb5'; ss += `<path d="${g.d}" fill="none" stroke="${c}" stroke-width="2"/><text x="${g.mx}" y="${g.my - 6}" text-anchor="middle" font-size="11" fill="#333">${e(ed.label)}</text>` }); DATA.nodes.forEach(n => { let p = pos[n.id]; ss += `<rect x="${p.x}" y="${p.y}" width="${n.w}" height="${n.h}" rx="12" fill="#f7f9fc" stroke="#60708a"/><text x="${p.x + 12}" y="${p.y + 27}" font-size="15" font-weight="700" fill="#172033">${e(n.label)}</text><text x="${p.x + 12}" y="${p.y + 48}" font-size="10" fill="#58657a">${e(n.flags?.join(' · ') || '')}</text>` }); ss += '</svg>'; dl('workflow_state_machine.svg', ss, 'image/svg+xml') };
+        renderNodes(); renderEdges(); transform();
+    </script>
+</body>
+
+</html>

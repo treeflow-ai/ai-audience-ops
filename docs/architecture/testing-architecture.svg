@@ -1,0 +1,177 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1790" height="1135" viewBox="0 0 1790 1135">
+<defs><marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 z" fill="#9fb1cf"/></marker></defs>
+<rect width="100%" height="100%" fill="#08101d"/>
+<text x="28" y="35" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="21" font-weight="700">Testing Architecture / Coverage</text>
+<path d="M 170.0 205.0 C 170.0 205.0, 170.0 420.0, 170.0 420.0" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="170.0" y="307.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">python -m compileall</text>
+<path d="M 170.0 205.0 C 170.0 205.0, 170.0 260.0, 170.0 260.0" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="170.0" y="227.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">pytest × 3 Python versions</text>
+<path d="M 295.0 312.5 C 330.0 312.5, 330.0 147.5, 365.0 147.5" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="330.0" y="225.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect fixtures/tests</text>
+<path d="M 295.0 312.5 C 515.0 312.5, 515.0 115.0, 735.0 115.0" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="515.0" y="208.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 295.0 312.5 C 515.0 312.5, 515.0 307.5, 735.0 307.5" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="515.0" y="305.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 295.0 312.5 C 515.0 312.5, 515.0 512.5, 735.0 512.5" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="515.0" y="407.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 295.0 312.5 C 515.0 312.5, 515.0 717.5, 735.0 717.5" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="515.0" y="510.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 295.0 312.5 C 515.0 312.5, 515.0 922.5, 735.0 922.5" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="515.0" y="612.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 295.0 312.5 C 692.5 312.5, 692.5 142.5, 1090.0 142.5" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="692.5" y="222.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 295.0 312.5 C 692.5 312.5, 692.5 340.0, 1090.0 340.0" fill="none" stroke="#79a7ff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="692.5" y="321.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">collect</text>
+<path d="M 645.0 147.5 C 690.0 147.5, 690.0 115.0, 735.0 115.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="690.0" y="126.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">demo</text>
+<path d="M 645.0 147.5 C 690.0 147.5, 690.0 512.5, 735.0 512.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="690.0" y="325.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">demo</text>
+<path d="M 505.0 220.0 C 695.0 220.0, 695.0 640.0, 885.0 640.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="695.0" y="425.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">demo</text>
+<path d="M 645.0 147.5 C 867.5 147.5, 867.5 340.0, 1090.0 340.0" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="867.5" y="238.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">demo</text>
+<path d="M 645.0 317.5 C 690.0 317.5, 690.0 512.5, 735.0 512.5" fill="none" stroke="#78cce5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="690.0" y="410.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">HTTP assertions</text>
+<path d="M 505.0 365.0 C 695.0 365.0, 695.0 640.0, 885.0 640.0" fill="none" stroke="#78cce5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="695.0" y="497.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">form/API regression</text>
+<path d="M 645.0 475.0 C 690.0 475.0, 690.0 512.5, 735.0 512.5" fill="none" stroke="#78cce5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="690.0" y="488.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">fake httpx clients</text>
+<path d="M 505.0 535.0 C 695.0 535.0, 695.0 840.0, 885.0 840.0" fill="none" stroke="#78cce5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="695.0" y="682.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">fake adapters/failures</text>
+<path d="M 645.0 475.0 C 867.5 475.0, 867.5 340.0, 1090.0 340.0" fill="none" stroke="#78cce5" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="867.5" y="402.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">record transition_to</text>
+<path d="M 645.0 640.0 C 690.0 640.0, 690.0 922.5, 735.0 922.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="690.0" y="776.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">durable semantics</text>
+<path d="M 645.0 640.0 C 867.5 640.0, 867.5 142.5, 1090.0 142.5" fill="none" stroke="#63d9b2" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="867.5" y="386.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">enum persistence</text>
+<path d="M 1035.0 115.0 C 1250.0 115.0, 1250.0 80.0, 1465.0 80.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="92.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">parser scenario</text>
+<path d="M 1035.0 115.0 C 1250.0 115.0, 1250.0 207.5, 1465.0 207.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="156.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">canonicalize / fail closed</text>
+<path d="M 1035.0 115.0 C 1250.0 115.0, 1250.0 477.5, 1465.0 477.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="291.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">create / approve / sync</text>
+<path d="M 1035.0 115.0 C 1250.0 115.0, 1250.0 617.5, 1465.0 617.5" fill="none" stroke="#8295b5" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="361.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">indirect integration</text>
+<path d="M 885.0 190.0 C 1242.5 190.0, 1242.5 830.0, 1600.0 830.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1242.5" y="505.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">states</text>
+<path d="M 1035.0 307.5 C 1250.0 307.5, 1250.0 207.5, 1465.0 207.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="252.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">direct unit/security</text>
+<path d="M 1035.0 307.5 C 1250.0 307.5, 1250.0 340.0, 1465.0 340.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="318.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">strict Pydantic model</text>
+<path d="M 1035.0 512.5 C 1250.0 512.5, 1250.0 340.0, 1465.0 340.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="421.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">settings/schema guards</text>
+<path d="M 1035.0 512.5 C 1250.0 512.5, 1250.0 477.5, 1465.0 477.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="490.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">approval + real sync guard</text>
+<path d="M 1035.0 512.5 C 1250.0 512.5, 1250.0 750.0, 1465.0 750.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="626.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">502 + lifespan recovery</text>
+<path d="M 1035.0 512.5 C 1062.5 512.5, 1062.5 710.0, 1090.0 710.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1062.5" y="606.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">CC polling + LD pagination</text>
+<path d="M 1035.0 717.5 C 1250.0 717.5, 1250.0 750.0, 1465.0 750.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="728.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">redirect + serialization</text>
+<path d="M 1035.0 717.5 C 1250.0 717.5, 1250.0 80.0, 1465.0 80.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="393.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">raw exposure variants</text>
+<path d="M 1035.0 717.5 C 1250.0 717.5, 1250.0 477.5, 1465.0 477.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="592.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">mandatory controls</text>
+<path d="M 1035.0 717.5 C 1250.0 717.5, 1250.0 1022.5, 1465.0 1022.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="865.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">force seed cleanup</text>
+<path d="M 1035.0 922.5 C 1250.0 922.5, 1250.0 477.5, 1465.0 477.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="695.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">durable sync coordinator</text>
+<path d="M 1035.0 922.5 C 1250.0 922.5, 1250.0 1022.5, 1465.0 1022.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="967.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">SyncJob / SyncBatch</text>
+<path d="M 1035.0 922.5 C 1062.5 922.5, 1062.5 710.0, 1090.0 710.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1062.5" y="811.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">error/idempotency boundary</text>
+<path d="M 1035.0 922.5 C 1250.0 922.5, 1250.0 882.5, 1465.0 882.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1250.0" y="897.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">SYNCED / SYNC_FAILED</text>
+<path d="M 1235.0 210.0 C 1417.5 210.0, 1417.5 830.0, 1600.0 830.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1417.5" y="515.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">enum behavior</text>
+<path d="M 1235.0 210.0 C 1417.5 210.0, 1417.5 965.0, 1600.0 965.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1417.5" y="582.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">string ↔ enum storage</text>
+<path d="M 1235.0 420.0 C 1417.5 420.0, 1417.5 830.0, 1600.0 830.0" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1417.5" y="620.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">7×7 matrix</text>
+<path d="M 1380.0 340.0 C 1422.5 340.0, 1422.5 477.5, 1465.0 477.5" fill="none" stroke="#c29cff" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1422.5" y="403.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">all business paths</text>
+<path d="M 885.0 190.0 C 1060.0 190.0, 1060.0 850.0, 1235.0 850.0" fill="none" stroke="#ff9575" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1060.0" y="515.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">privacy + block + approval</text>
+<path d="M 885.0 385.0 C 1060.0 385.0, 1060.0 850.0, 1235.0 850.0" fill="none" stroke="#ff9575" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1060.0" y="612.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">LLM boundary</text>
+<path d="M 885.0 595.0 C 1060.0 595.0, 1060.0 850.0, 1235.0 850.0" fill="none" stroke="#ff9575" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1060.0" y="717.5" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">preflight / manager / provider</text>
+<path d="M 1035.0 717.5 C 1062.5 717.5, 1062.5 935.0, 1090.0 935.0" fill="none" stroke="#ff9575" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1062.5" y="821.2" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">mandatory controls</text>
+<path d="M 1035.0 922.5 C 1062.5 922.5, 1062.5 935.0, 1090.0 935.0" fill="none" stroke="#ff9575" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1062.5" y="923.8" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">no replay / recovery</text>
+<path d="M 1235.0 420.0 C 1235.0 420.0, 1235.0 850.0, 1235.0 850.0" fill="none" stroke="#ff9575" stroke-width="2" marker-end="url(#arrow)" opacity=".85"/>
+<text x="1235.0" y="630.0" text-anchor="middle" fill="#c9d4e8" stroke="#08101d" stroke-width="5" paint-order="stroke" font-family="system-ui,sans-serif" font-size="9.5">state contract</text>
+<rect x="45.0" y="95.0" width="250.0" height="110.0" rx="12" fill="#121c30" stroke="#79a7ff" stroke-width="1.5"/>
+<text x="57.0" y="120.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">GitHub Actions</text>
+<text x="57.0" y="138.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">.github/workflows/test.yml</text>
+<rect x="45.0" y="260.0" width="250.0" height="105.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="57.0" y="285.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">pytest</text>
+<text x="57.0" y="303.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">pyproject.toml</text>
+<rect x="45.0" y="420.0" width="250.0" height="85.0" rx="12" fill="#121c30" stroke="#566987" stroke-width="1.5"/>
+<text x="57.0" y="445.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">compileall gate</text>
+<text x="57.0" y="463.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">app + scripts + tests</text>
+<rect x="365.0" y="75.0" width="280.0" height="145.0" rx="12" fill="#121c30" stroke="#63d9b2" stroke-width="1.5"/>
+<text x="377.0" y="100.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">demo fixture</text>
+<text x="377.0" y="118.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">tests/conftest.py</text>
+<rect x="365.0" y="270.0" width="280.0" height="95.0" rx="12" fill="#121c30" stroke="#78cce5" stroke-width="1.5"/>
+<text x="377.0" y="295.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">FastAPI TestClient</text>
+<text x="377.0" y="313.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">HTTP / UI integration harness</text>
+<rect x="365.0" y="415.0" width="280.0" height="120.0" rx="12" fill="#121c30" stroke="#78cce5" stroke-width="1.5"/>
+<text x="377.0" y="440.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">pytest monkeypatch / fakes</text>
+<text x="377.0" y="458.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">controlled failure + provider doubles</text>
+<rect x="365.0" y="590.0" width="280.0" height="100.0" rx="12" fill="#121c30" stroke="#63d9b2" stroke-width="1.5"/>
+<text x="377.0" y="615.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Isolated SQLite</text>
+<text x="377.0" y="633.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">sqlite+pysqlite:///:memory:</text>
+<rect x="735.0" y="40.0" width="300.0" height="150.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="747.0" y="65.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_workflow.py</text>
+<text x="747.0" y="83.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">scenario / service integration</text>
+<rect x="735.0" y="230.0" width="300.0" height="155.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="747.0" y="255.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_llm_boundary.py</text>
+<text x="747.0" y="273.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">LLM trust-boundary unit/security tests</text>
+<rect x="735.0" y="430.0" width="300.0" height="165.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="747.0" y="455.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_hardening.py</text>
+<text x="747.0" y="473.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">config / API / adapter safety</text>
+<rect x="735.0" y="640.0" width="300.0" height="155.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="747.0" y="665.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_regressions.py</text>
+<text x="747.0" y="683.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">bug + governance regression suite</text>
+<rect x="735.0" y="840.0" width="300.0" height="165.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="747.0" y="865.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_sync_resilience.py</text>
+<text x="747.0" y="883.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">durable sync failure/recovery</text>
+<rect x="1090.0" y="75.0" width="290.0" height="135.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="1102.0" y="100.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_workflow_state.py</text>
+<text x="1102.0" y="118.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">enum + persistence contract</text>
+<rect x="1090.0" y="260.0" width="290.0" height="160.0" rx="12" fill="#121c30" stroke="#c29cff" stroke-width="1.5"/>
+<text x="1102.0" y="285.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">test_workflow_transitions.py</text>
+<text x="1102.0" y="303.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">state-machine contract + business paths</text>
+<rect x="1465.0" y="35.0" width="270.0" height="90.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="60.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/llm.py</text>
+<text x="1477.0" y="78.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">MockIntentParser</text>
+<rect x="1465.0" y="155.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="180.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/llm_boundary.py</text>
+<text x="1477.0" y="198.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">untrusted output validation</text>
+<rect x="1465.0" y="290.0" width="270.0" height="100.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="315.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">schemas.py + config.py</text>
+<text x="1477.0" y="333.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">Pydantic + Settings validation</text>
+<rect x="1465.0" y="420.0" width="270.0" height="115.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="445.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/services.py</text>
+<text x="1477.0" y="463.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">AudienceService</text>
+<rect x="1465.0" y="565.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="590.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">policy.py + query_engine.py</text>
+<text x="1477.0" y="608.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">deterministic governance / audience filt…</text>
+<rect x="1465.0" y="700.0" width="270.0" height="100.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="725.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/main.py</text>
+<text x="1477.0" y="743.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">FastAPI routes + lifespan</text>
+<rect x="1465.0" y="830.0" width="270.0" height="105.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="855.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">app/workflow.py</text>
+<text x="1477.0" y="873.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">WorkflowState</text>
+<rect x="1465.0" y="965.0" width="270.0" height="115.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1477.0" y="990.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">models.py + db.py + seed.py</text>
+<text x="1477.0" y="1008.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">persistence + deterministic test data</text>
+<rect x="1090.0" y="650.0" width="290.0" height="120.0" rx="12" fill="#121c30" stroke="#f0c96b" stroke-width="1.5"/>
+<text x="1102.0" y="675.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">adapters/marketing.py + learndash.py</text>
+<text x="1102.0" y="693.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">provider boundaries</text>
+<rect x="1090.0" y="850.0" width="290.0" height="170.0" rx="12" fill="#121c30" stroke="#ff9575" stroke-width="1.5"/>
+<text x="1102.0" y="875.0" fill="#edf3ff" font-family="system-ui,sans-serif" font-size="13.5" font-weight="700">Safety / governance invariants</text>
+<text x="1102.0" y="893.0" fill="#a6b4cf" font-family="system-ui,sans-serif" font-size="9.5">what the suite proves repeatedly</text>
+</svg>
