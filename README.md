@@ -1,14 +1,34 @@
 # AI Audience Ops
 
-**Governed AI audience orchestration for LearnDash with deterministic policy enforcement, validated LLM boundaries, human approval, and durable idempotent marketing sync.**
+**A production-minded AI workflow that turns natural-language audience requests into governed, auditable marketing actions — without giving the LLM authority over policy, data access, approvals, or downstream side effects.**
 
-This repository is a production-minded demo of a governed AI audience workflow. It models a realistic marketing operations problem: using AI to interpret audience requests while keeping privacy controls, approval decisions, data access, and downstream execution in deterministic application code.
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Open_on_Render-2ea44f?style=for-the-badge)](https://ai-audience-ops.onrender.com/)
+[![Architecture](https://img.shields.io/badge/Architecture-View_Design-blue?style=for-the-badge)](ARCHITECTURE.md)
+[![Failure Recovery](https://img.shields.io/badge/Failure_Recovery-Resilience_Design-orange?style=for-the-badge)](docs/SYNC_RESILIENCE.md)
 
-The project uses synthetic data, mock integrations, and credential-free defaults so the workflow and engineering trade-offs can be explored safely in a public repository. It is intended as a reference implementation and engineering portfolio project, not as a production deployment.
+> **AI interprets business language. Deterministic application code owns authorization, privacy controls, approval state, and downstream side effects.**
 
-A marketing user describes an audience in plain English. The system converts that request into a constrained intent, validates the AI output at an application-owned boundary, applies deterministic policy and data-access controls, evaluates synthetic LearnDash-style activity, routes large audiences to human approval, and releases only governed recipients through a durable, resumable marketing-sync coordinator.
+## 30-second recruiter view
 
-> AI interprets business language. Deterministic application code owns policy enforcement, privacy controls, approval state, and downstream side effects. 
+| Engineering proof point                       | What this project demonstrates                                                                                                                                                                    |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **AI with hard trust boundaries**             | Natural-language requests become a validated `AudienceIntent`; the LLM cannot execute SQL, bypass consent/suppression rules, approve its own request, or directly trigger marketing side effects. |
+| **Governance before execution**               | Raw contact-data export is blocked before audience evaluation, large releases require human approval, and every decision is represented in an auditable workflow.                                 |
+| **Failure recovery, not just the happy path** | Sync runs as durable `SyncJob` / `SyncBatch` checkpoints with stable idempotency keys, bounded transient retries, and recovery from `SYNC_FAILED` without replaying already-successful batches.   |
+
+### Try it live
+
+The public demo runs on **12,000 deterministic synthetic learners** with credential-free mock marketing integrations.
+
+**Compliant request** → governed audience → `416` eligible recipients
+**Raw email export** → blocked before release
+**Large audience** → `6,709` recipients → human approval required
+**Failure recovery** → inject a sync failure → preserve completed checkpoints → retry only unfinished work
+
+**→ [Open the live demo](https://ai-audience-ops.onrender.com/)**
+
+This is a reference implementation and engineering portfolio project using synthetic data and mock integrations; it is not presented as a production deployment or compliance certification.
+
 
 ## Demo videos
 
