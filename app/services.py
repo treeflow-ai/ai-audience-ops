@@ -11,6 +11,7 @@ from sqlalchemy import and_, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, selectinload
 
+from .adapters.demo_failure import DEMO_FAILURE_MODES, FailureInjectingMarketingAdapter
 from .adapters.marketing import (
     PermanentMarketingAdapterError,
     Recipient,
@@ -150,7 +151,12 @@ class AudienceService:
         self.session.commit()
         return self.get_request(request_id)
 
-    def sync(self, request_id: int) -> AudienceRequest:
+    def sync(
+        self,
+        request_id: int,
+        *,
+        demo_failure: str | None = None,
+    ) -> AudienceRequest:
         """Run or resume one durable, idempotent sync job.
 
         The HTTP call may execute several batches synchronously, but progress is
@@ -159,6 +165,16 @@ class AudienceService:
         """
 
         request = self.get_request(request_id)
+        if demo_failure:
+            if not self.settings.demo_mode:
+                raise ValueError("Failure injection requires DEMO_MODE=true.")
+            if demo_failure not in DEMO_FAILURE_MODES:
+                raise ValueError(f"Unsupported demo failure mode: {demo_failure}")
+            if request.marketing_provider not in {"mock_mailchimp", "mock_constantcontact"}:
+                raise ValueError(
+                    "Failure injection is available only for mock marketing providers."
+                )
+
 
         # A repeated sync after success is a no-op and returns the durable result.
         if request.sync_job and request.sync_job.status == "SUCCEEDED":
@@ -219,6 +235,8 @@ class AudienceService:
         self.session.commit()
 
         adapter = get_marketing_adapter(request.marketing_provider, self.settings)
+        if demo_failure:
+            adapter = FailureInjectingMarketingAdapter(adapter, demo_failure)
 
         while True:
             request = self.get_request(request_id)
