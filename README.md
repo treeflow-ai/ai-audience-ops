@@ -1,44 +1,62 @@
 # AI Audience Ops
 
-**A production-minded AI workflow that turns natural-language audience requests into governed, auditable marketing actions — without giving the LLM authority over policy, data access, approvals, or downstream side effects.**
+**Governed AI audience orchestration with hard LLM trust boundaries, deterministic policy controls, human approval, and checkpoint-based failure recovery.**
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Open_on_Render-2ea44f?style=for-the-badge)](https://ai-audience-ops.onrender.com/)
-[![Architecture](https://img.shields.io/badge/Architecture-View_Design-blue?style=for-the-badge)](ARCHITECTURE.md)
-[![Failure Recovery](https://img.shields.io/badge/Failure_Recovery-Resilience_Design-orange?style=for-the-badge)](docs/SYNC_RESILIENCE.md)
+[![Recruiter Demo](https://img.shields.io/badge/1%3A47_Demo-Watch_on_YouTube-ff0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/2HA97gkdYY8)
+[![Interactive Architecture](https://img.shields.io/badge/Interactive_Architecture-GitHub_Pages-3b82f6?style=for-the-badge)](https://treeflow-ai.github.io/ai-audience-ops/architecture/)
+[![Failure Recovery](https://img.shields.io/badge/Failure_Recovery-Resilience_Design-f59e0b?style=for-the-badge)](docs/SYNC_RESILIENCE.md)
 
 > **AI interprets business language. Deterministic application code owns authorization, privacy controls, approval state, and downstream side effects.**
 
+## Start here
+
+| Time | Fastest way to evaluate the project |
+|---|---|
+| **~2 min** | [Watch the recruiter demo](https://youtu.be/2HA97gkdYY8) — governance, human approval, and failure recovery |
+| **~5 min** | [Open the live demo](https://ai-audience-ops.onrender.com/) — try the built-in scenarios and inject a partial sync failure |
+| **Technical deep dive** | [Explore the interactive architecture](https://treeflow-ai.github.io/ai-audience-ops/architecture/) — system view, lifecycle, state machine, ERD, LLM guardrails, durable sync, and test coverage |
+
+[![AI Audience Ops recruiter demo](https://img.youtube.com/vi/2HA97gkdYY8/hqdefault.jpg)](https://youtu.be/2HA97gkdYY8)
+
 ## 30-second recruiter view
 
-| Engineering proof point                       | What this project demonstrates                                                                                                                                                                    |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **AI with hard trust boundaries**             | Natural-language requests become a validated `AudienceIntent`; the LLM cannot execute SQL, bypass consent/suppression rules, approve its own request, or directly trigger marketing side effects. |
-| **Governance before execution**               | Raw contact-data export is blocked before audience evaluation, large releases require human approval, and every decision is represented in an auditable workflow.                                 |
-| **Failure recovery, not just the happy path** | Sync runs as durable `SyncJob` / `SyncBatch` checkpoints with stable idempotency keys, bounded transient retries, and recovery from `SYNC_FAILED` without replaying already-successful batches.   |
+| Engineering proof point | What this project demonstrates |
+|---|---|
+| **AI with hard trust boundaries** | Natural-language requests become a validated `AudienceIntent`; the LLM cannot execute SQL, bypass consent/suppression rules, approve its own request, or directly trigger marketing side effects. |
+| **Governance before execution** | Raw contact-data export is blocked before audience evaluation, large releases require human approval, and decisions are captured in an auditable workflow. |
+| **Failure recovery, not just the happy path** | Durable `SyncJob` / `SyncBatch` checkpoints, stable idempotency keys, transient retry/backoff, and recovery from `SYNC_FAILED` without replaying already-successful batches. |
 
-### Try it live
+## Architecture at a glance
+
+[![AI Audience Ops architecture overview](docs/architecture/architecture-overview.svg)](https://treeflow-ai.github.io/ai-audience-ops/architecture/architecture-overview.html)
+
+**→ [Open the interactive architecture portfolio](https://treeflow-ai.github.io/ai-audience-ops/architecture/)**
+
+The architecture portfolio provides seven implementation-backed views:
+
+- **Architecture Overview** — components, trust boundaries, data flow, persistence, and external integrations.
+- **Request Lifecycle** — natural-language request → governed audience → approval → durable synchronization.
+- **Workflow State Machine** — public request states plus `SyncJob` / `SyncBatch` execution internals.
+- **SQLAlchemy ERD** — tables, constraints, relationships, and persistent recovery state.
+- **LLM Guardrail Pipeline** — untrusted model output → schema/boundary validation → deterministic execution.
+- **Durable Sync Sequence** — idempotency, batching, leases, retries, checkpoints, and recovery.
+- **Testing Architecture** — pytest structure, CI runners, security invariants, and coverage boundaries.
+
+For the written design rationale, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+## Try the live demo
 
 The public demo runs on **12,000 deterministic synthetic learners** with credential-free mock marketing integrations.
 
-**Compliant request** → governed audience → `416` eligible recipients
-**Raw email export** → blocked before release
-**Large audience** → `6,709` recipients → human approval required
-**Failure recovery** → inject a sync failure → preserve completed checkpoints → retry only unfinished work
+- **Compliant request** → governed audience → `416` eligible recipients.
+- **Raw email export** → blocked before audience evaluation.
+- **Large audience** → `6,709` recipients → explicit human approval required.
+- **Failure recovery** → inject a partial sync failure → preserve completed checkpoints → retry only unfinished work.
 
 **→ [Open the live demo](https://ai-audience-ops.onrender.com/)**
 
-This is a reference implementation and engineering portfolio project using synthetic data and mock integrations; it is not presented as a production deployment or compliance certification.
-
-
-## Demo videos
-
-| Short overview | Engineering walkthrough |
-|---|---|
-| [![AI Audience Ops short demo](https://img.youtube.com/vi/9STwVwbaNr0/hqdefault.jpg)](https://youtu.be/9STwVwbaNr0) | [![AI Audience Ops engineering demo](https://img.youtube.com/vi/eUC1dkTPuW0/hqdefault.jpg)](https://youtu.be/eUC1dkTPuW0) |
-| **~2 min:** problem, architecture boundary, and three proof points | **~4 min:** architecture, governance, deterministic filtering, approval, and sync |
-
-**Start with the short overview.** The engineering walkthrough goes deeper into why the LLM is intentionally kept outside the authorization and execution boundary.
-> **Note:** The demo videos predate the latest durable sync update. They still reflect the current LLM trust boundary, deterministic policy enforcement, approval workflow, and core product flow. The current repository additionally implements idempotent batch execution, bounded retries, leases, and checkpoint-based failure recovery; see **Key engineering decisions** and [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md).
+The demo intentionally uses synthetic data and mock integrations. It is a reference implementation and engineering portfolio project, not a production deployment or compliance certification.
 
 ## What the project demonstrates
 
@@ -147,38 +165,6 @@ Run all three from the CLI:
 python scripts/run_demo.py
 ```
 
-## Architecture
-
-```mermaid
-flowchart LR
-    U[Marketing request] --> P[Intent parser]
-    P --> V[LLM boundary validation]
-    V --> S[Constrained AudienceIntent]
-    S --> R[Policy retrieval]
-    S --> G[Deterministic policy engine]
-    G -->|blocked| B[Block + audit]
-    G --> Q[Audience query engine]
-    L[(Synthetic LearnDash-style data)] --> Q
-    Q --> F[Explainable funnel]
-    F --> T{Over approval threshold?}
-    T -->|yes| H[Manager approval]
-    T -->|no| J[Durable sync coordinator]
-    H --> J
-    J --> SJ[(SyncJob + SyncBatch checkpoints)]
-    J --> M[Marketing adapter]
-    M --> MC[Mailchimp / mock]
-    M --> CC[Constant Contact / mock]
-    P --> A[(Audit trail)]
-    V --> A
-    R --> A
-    G --> A
-    Q --> A
-    H --> A
-    J --> A
-    M --> A
-```
-
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the trust boundaries and state model.
 
 ## Key engineering decisions
 
