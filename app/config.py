@@ -37,6 +37,7 @@ class Settings:
     openai_model: str = field(default_factory=lambda: _env("OPENAI_MODEL", "gpt-5.5"))
     approval_threshold: int = field(default_factory=lambda: _env_int("APPROVAL_THRESHOLD", 5000))
     synthetic_student_count: int = field(default_factory=lambda: _env_int("SYNTHETIC_STUDENT_COUNT", 12000))
+    demo_mode: bool = field(default_factory=lambda: _bool("DEMO_MODE", False))
     allow_real_marketing_sync: bool = field(default_factory=lambda: _bool("ALLOW_REAL_MARKETING_SYNC", False))
     real_sync_max_recipients: int = field(default_factory=lambda: _env_int("REAL_SYNC_MAX_RECIPIENTS", 500))
 

@@ -87,10 +87,23 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
         try:
             with Session(engine) as session:
                 obj = _decorate(AudienceService(session, settings).get_request(request_id))
+                recovery_requested_at = max(
+                    (
+                        event.created_at
+                        for event in obj.events
+                        if event.event_type == "SYNC_RETRY_REQUESTED"
+                    ),
+                    default=None,
+                )
             return TEMPLATES.TemplateResponse(
                 request=request,
                 name="detail.html",
-                context={"item": obj, "settings": settings, "WorkflowState": WorkflowState},
+                context={
+                    "item": obj,
+                    "settings": settings,
+                    "WorkflowState": WorkflowState,
+                    "recovery_requested_at": recovery_requested_at,
+                },
             )
         except LookupError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -107,18 +120,22 @@ def create_app(settings: Settings | None = None, engine: Engine | None = None) -
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     @app.post("/requests/{request_id}/sync")
-    def sync_form(request_id: int):
+    def sync_form(request_id: int, demo_failure: str = Form("")):
         try:
             with Session(engine) as session:
-                AudienceService(session, settings).sync(request_id)
+                AudienceService(session, settings).sync(
+                    request_id,
+                    demo_failure=demo_failure.strip() or None,
+                )
             return RedirectResponse(url=f"/requests/{request_id}", status_code=303)
         except LookupError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
         except ValueError as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
-        except MarketingSyncError as exc:
-            raise HTTPException(status_code=502, detail=str(exc)) from exc
-
+        except MarketingSyncError:
+            # Durable failure state is already committed. Return to the
+            # operator view so checkpoints and recovery are visible.
+            return RedirectResponse(url=f"/requests/{request_id}", status_code=303)
     @app.get("/api/requests")
     def api_list_requests():
         with Session(engine) as session:

@@ -2,6 +2,7 @@
 {% block title %}{{ item.request_key }} — AI Audience Ops{% endblock %}
 {% block content %}
 <a href="/" class="back">← Dashboard</a>
+
 <section class="detail-head">
   <div>
     <p class="eyebrow">{{ item.request_key }}</p>
@@ -26,15 +27,85 @@
   <div><strong>Human approval required</strong><p>The deterministic policy threshold was exceeded. The audience cannot sync until the identified manager approves it.</p></div>
   <form action="/requests/{{ item.id }}/approve" method="post"><input name="approver" value="{{ item.manager or 'Jane Smith' }}"><button class="primary">Approve audience</button></form>
 </section>
+
+{% elif item.status is sameas WorkflowState.SYNC_FAILED %}
+<section class="action-panel danger">
+  <div><strong>Sync failed — checkpoint preserved</strong><p>Successful batches remain committed. Retry resumes the same logical SyncJob instead of replaying completed side effects.</p></div>
+  <form action="/requests/{{ item.id }}/sync" method="post"><button class="primary">Retry failed sync</button></form>
+</section>
+
 {% elif item.status.can_sync %}
 <section class="action-panel good">
   <div><strong>Ready for governed sync</strong><p>Raw email addresses remain hidden in this UI. The integration layer receives only eligible records after all system controls.</p></div>
   <form action="/requests/{{ item.id }}/sync" method="post"><button class="primary">Sync to {{ item.marketing_provider }}</button></form>
 </section>
+
+{% if settings.demo_mode and item.sync_job is none and item.marketing_provider in ['mock_mailchimp', 'mock_constantcontact'] %}
+<section class="failure-lab">
+  <div>
+    <p class="eyebrow">FAILURE RECOVERY LAB · DEMO ONLY</p>
+    <strong>Prove recovery semantics</strong>
+    <p class="muted">Inject a deterministic failure at the provider boundary. Synthetic data and mock integrations only.</p>
+  </div>
+  <div class="failure-actions">
+    <form action="/requests/{{ item.id }}/sync" method="post">
+      <input type="hidden" name="demo_failure" value="transient_once">
+      <button type="submit">Simulate transient retry</button>
+    </form>
+    <form action="/requests/{{ item.id }}/sync" method="post">
+      <input type="hidden" name="demo_failure" value="terminal_once">
+      <button type="submit">Simulate partial failure</button>
+    </form>
+  </div>
+</section>
+{% endif %}
+
 {% elif item.status is sameas WorkflowState.SYNCED %}
 <section class="action-panel good"><div><strong>Synced</strong><p>{{ item.sync_detail }}</p></div><code>{{ item.external_segment_id }}</code></section>
+
 {% elif item.status is sameas WorkflowState.BLOCKED %}
 <section class="action-panel danger"><div><strong>Request blocked</strong><p>The system will not produce an audience or expose student contact data when a policy-blocking condition is present.</p></div></section>
+{% endif %}
+
+{% if item.sync_job %}
+<section class="panel sync-proof">
+  <div class="panel-head">
+    <div><p class="eyebrow">DURABLE SIDE EFFECTS</p><h2>Failure recovery evidence</h2></div>
+    <span class="pill neutral">Job {{ item.sync_job.status }}</span>
+  </div>
+
+  <div class="sync-proof-summary">
+    <div><span>Completed</span><strong>{{ item.sync_job.completed_batches }} / {{ item.sync_job.total_batches }}</strong><small>batches</small></div>
+    <div><span>Retry round</span><strong>{{ item.sync_job.retry_round }}</strong><small>operator recovery rounds</small></div>
+    <div><span>Job idempotency</span><code title="{{ item.sync_job.idempotency_key }}">{{ item.sync_job.idempotency_key[:16] }}…</code><small>stable logical release</small></div>
+  </div>
+
+  <div class="batch-proof-list">
+    {% for batch in item.sync_job.batches %}
+    <div class="batch-proof">
+      <div><strong>Batch {{ batch.batch_index + 1 }}</strong><span class="pill batch-{{ batch.status|lower }}">{{ batch.status }}</span></div>
+      <div><span>Attempts</span><strong>{{ batch.attempts }}</strong></div>
+      <div><span>Idempotency</span><code title="{{ batch.idempotency_key }}">{{ batch.idempotency_key[:14] }}…</code></div>
+      <div>
+        <span>Checkpoint</span>
+        {% if recovery_requested_at and batch.completed_at and batch.completed_at < recovery_requested_at %}
+          <strong class="proof-good">PRESERVED</strong><small>not replayed during recovery</small>
+        {% elif recovery_requested_at and batch.completed_at and batch.attempts > 1 %}
+          <strong class="proof-good">RESUMED → SUCCEEDED</strong><small>same batch identity</small>
+        {% elif batch.status == "SUCCEEDED" and batch.attempts > 1 %}
+          <strong class="proof-good">RETRIED → SUCCEEDED</strong><small>same batch identity</small>
+        {% elif batch.status == "SUCCEEDED" %}
+          <strong class="proof-good">COMMITTED</strong><small>durable checkpoint</small>
+        {% elif batch.status == "FAILED" %}
+          <strong class="proof-danger">FAILED</strong><small>{{ batch.last_error }}</small>
+        {% else %}
+          <strong>{{ batch.status }}</strong><small>not yet committed</small>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
 {% endif %}
 
 <section class="grid-2">
