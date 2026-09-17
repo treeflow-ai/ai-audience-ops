@@ -3,7 +3,7 @@
 **Governed AI audience orchestration with hard LLM trust boundaries, deterministic policy controls, human approval, and checkpoint-based failure recovery.**
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Open_on_Render-2ea44f?style=for-the-badge)](https://ai-audience-ops.onrender.com/)
-[![Recruiter Demo](https://img.shields.io/badge/1%3A47_Demo-Watch_on_YouTube-ff0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/2HA97gkdYY8)
+[![Project Overview](https://img.shields.io/badge/Project_Overview-Watch_on_YouTube-ff0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtu.be/2HA97gkdYY8)
 [![Interactive Architecture](https://img.shields.io/badge/Interactive_Architecture-GitHub_Pages-3b82f6?style=for-the-badge)](https://treeflow-ai.github.io/ai-audience-ops/architecture/)
 [![Failure Recovery](https://img.shields.io/badge/Failure_Recovery-Resilience_Design-f59e0b?style=for-the-badge)](docs/SYNC_RESILIENCE.md)
 
@@ -11,15 +11,15 @@
 
 ## Start here
 
-| Time | Fastest way to evaluate the project |
+| Path | What it shows |
 |---|---|
-| **~2 min** | [Watch the recruiter demo](https://youtu.be/2HA97gkdYY8) — governance, human approval, and failure recovery |
-| **~5 min** | [Open the live demo](https://ai-audience-ops.onrender.com/) — try the built-in scenarios and inject a partial sync failure |
-| **Technical deep dive** | [Explore the interactive architecture](https://treeflow-ai.github.io/ai-audience-ops/architecture/) — system view, lifecycle, state machine, ERD, LLM guardrails, durable sync, and test coverage |
+| **Project overview · ~2 min** | [Watch the project overview](https://youtu.be/2HA97gkdYY8) — governed workflow, human approval, and failure recovery |
+| **Live demo · ~5 min** | [Open the live demo](https://ai-audience-ops.onrender.com/) — try the built-in scenarios and inject a partial sync failure |
+| **Architecture deep dive** | [Explore the interactive architecture](https://treeflow-ai.github.io/ai-audience-ops/architecture/) — system view, lifecycle, state machine, ERD, LLM guardrails, durable sync, and test coverage |
 
-[![AI Audience Ops recruiter demo](https://img.youtube.com/vi/2HA97gkdYY8/hqdefault.jpg)](https://youtu.be/2HA97gkdYY8)
+[![AI Audience Ops project overview](https://img.youtube.com/vi/2HA97gkdYY8/hqdefault.jpg)](https://youtu.be/2HA97gkdYY8)
 
-## 30-second recruiter view
+## Engineering highlights
 
 | Engineering proof point | What this project demonstrates |
 |---|---|
@@ -57,6 +57,14 @@ The public demo runs on **12,000 deterministic synthetic learners** with credent
 **→ [Open the live demo](https://ai-audience-ops.onrender.com/)**
 
 The demo intentionally uses synthetic data and mock integrations. It is a reference implementation and engineering portfolio project, not a production deployment or compliance certification.
+
+## Engineering walkthrough
+
+For more implementation context beyond the Project Overview:
+
+**[Watch the ~4 min engineering walkthrough](https://youtu.be/9STwVwbaNr0)** — a deeper look at the LLM trust boundary, deterministic governance, audience filtering, human approval, and adapter design.
+
+> This earlier walkthrough predates the latest checkpoint-based failure-recovery UI. For the current recovery flow, watch the [Project Overview](https://youtu.be/2HA97gkdYY8) or see [docs/SYNC_RESILIENCE.md](docs/SYNC_RESILIENCE.md).
 
 ## What the project demonstrates
 
@@ -285,6 +293,7 @@ DATABASE_URL=sqlite:///./var/audience_ops.db
 LLM_PROVIDER=mock
 APPROVAL_THRESHOLD=5000
 SYNTHETIC_STUDENT_COUNT=12000
+DEMO_MODE=false
 ALLOW_REAL_MARKETING_SYNC=false
 REAL_SYNC_MAX_RECIPIENTS=500
 SYNC_BATCH_SIZE=100
@@ -294,6 +303,33 @@ SYNC_LEASE_SECONDS=120
 ```
 
 Never commit a real `.env` or provider credentials.
+
+### Failure-recovery demo mode
+
+`DEMO_MODE` is **off by default**. It enables demo-only failure injection controls for the mock marketing adapters:
+
+```bash
+export DEMO_MODE=true
+```
+
+When enabled on an eligible mock-provider request, the detail page exposes:
+
+- **Simulate transient retry** — injects a retryable provider failure so the coordinator retries the same batch identity.
+- **Simulate partial failure** — commits an earlier batch, fails a later batch, and demonstrates operator recovery from the preserved checkpoint.
+
+Failure injection is accepted only when `DEMO_MODE=true` and the destination is `mock_mailchimp` or `mock_constantcontact`. It does **not** enable real marketing delivery.
+
+The hosted Render demo intentionally uses:
+
+```text
+DEMO_MODE=true
+LLM_PROVIDER=mock
+ALLOW_REAL_MARKETING_SYNC=false
+SYNC_BATCH_SIZE=100
+```
+
+This makes the resilience controls visible while keeping the public demo on synthetic data and mock downstream integrations. For normal local behavior, leave `DEMO_MODE=false`.
+
 
 ## Optional OpenAI intent parser
 
